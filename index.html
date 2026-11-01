@@ -60,10 +60,19 @@ main{flex:1;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:m
 .ctr-v{font-family:var(--display);font-weight:700;fill:var(--spend)}
 .ctr-s{font:500 11px var(--body);fill:var(--muted)}
 .pct{font:600 12.5px var(--body)}
-.pill-row{display:grid;grid-template-columns:52px 1fr 52px;align-items:center;gap:8px;margin-top:6px}
-.lines{height:44px;display:grid;place-items:center;border-radius:12px;color:var(--muted)}
+.pill-row{display:grid;grid-template-columns:56px 1fr 66px;align-items:center;gap:8px;margin-top:6px}
+.lines{height:44px;display:grid;place-items:center;border-radius:12px;color:var(--ink);background:var(--surface);border:1px solid var(--line)}
+.today{height:44px;display:grid;align-content:center;justify-items:center;gap:1px;border-radius:12px;background:var(--surface);border:1px solid var(--line);color:var(--ink);line-height:1.1}
+.today small{font-size:10px;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}.today b{font:600 14px var(--display)}
+.tx{cursor:pointer}.tx:active{background:var(--chip)}
+.esheet{position:fixed;inset:0;z-index:35;background:color-mix(in srgb,#000 45%,transparent);display:flex;align-items:flex-end;justify-content:center}
+.esheet .box{width:min(520px,100%);background:var(--bg);border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));display:grid;gap:10px}
+.esheet .t{font:600 17px var(--display)}.esheet .s{color:var(--muted);font-size:13.5px}
+.esheet .go{padding:13px;border:0;border-radius:10px;background:var(--head);color:var(--head-ink);font:600 16px var(--body)}
+.esheet .x{padding:12px;border:1.5px solid var(--line);border-radius:10px;background:transparent;color:var(--ink);font:500 15px var(--body)}
+.card.sel{outline:2px solid var(--cc);outline-offset:-2px}
 .lines svg{width:34px;height:20px;stroke:currentColor;stroke-width:2;stroke-linecap:round}
-.lines[aria-pressed="true"]{color:var(--head);background:var(--chip)}
+.lines[aria-pressed="true"]{background:var(--head);color:var(--head-ink);border-color:var(--head)}
 .pill{background:var(--spend);color:#fff;border-radius:10px;padding:12px 14px;text-align:center;font-family:var(--display);font-size:19px;font-weight:600;
   box-shadow:0 2px 0 color-mix(in srgb,var(--spend) 60%,black)}
 .pill small{font-family:var(--body);font-weight:500;font-size:13px;opacity:.9;margin-right:6px}
@@ -191,7 +200,7 @@ main{flex:1;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:m
     <div class="pill-row">
       <button class="lines" id="listL" aria-pressed="false" aria-label="Show category list"><svg viewBox="0 0 34 20"><path d="M2 3h30M2 10h30M2 17h30"/></svg></button>
       <button class="pill num" id="pill" aria-label="Toggle chart and list"><small>Spent</small><span id="pillAmt">₹0</span></button>
-      <button class="lines" id="listR" aria-pressed="false" aria-label="Show category list"><svg viewBox="0 0 34 20"><path d="M2 3h30M2 10h30M2 17h30"/></svg></button>
+      <button class="today" id="todayBtn" aria-label="Spent today, tap to see today"><small>Today</small><b class="num" id="todayAmt">₹0</b></button>
     </div>
     <section id="ledger" class="ledger" hidden></section>
   </main>
@@ -223,10 +232,12 @@ main{flex:1;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:m
 
 <div class="gate" id="gate" hidden><form id="gForm"><h2>Adi &amp; Choti Kharcha</h2><p>Enter the family passcode (once on this phone).</p>
 <input id="gIn" type="password" autocomplete="off" aria-label="Passcode"><button type="submit">Open</button><div class="err" id="gErr" role="alert"></div></form></div>
+<div class="esheet" id="eSheet" hidden><div class="box"><div class="t" id="eT"></div><div class="s" id="eS"></div>
+<button class="go" id="eEdit" type="button">Edit this expense</button><button class="x" id="eClose" type="button">Close</button></div></div>
 <div class="add" id="addSheet" hidden>
   <div class="hd">
     <button class="ib" id="closeAdd" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
-    <h2>New expense</h2>
+    <h2 id="addTitle">New expense</h2>
   </div>
   <div class="abody">
     <label class="adate"><svg viewBox="0 0 24 24"><path d="M4 6h16v14H4zM4 10h16M8 3v5M16 3v5"/></svg><span id="aDateTxt">Today</span>
@@ -266,6 +277,7 @@ window.google={script:{run:(function(){
       const done=r=>{ if(r&&r.ok) ok&&ok(r.d); else bad&&bad(new Error((r&&r.m)||"Couldn't reach the sheet.")); };
       const fail=()=>bad&&bad(new Error("Couldn't reach Google just now. Check your internet and tap Sync."));
       if(name==="getData") fetch(API+"?action=get&pass="+encodeURIComponent(a[0]||"")).then(r=>r.json()).then(done,fail);
+      else if(name==="updateExpense") fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"edit",e:a[0],pass:a[1]})}).then(r=>r.json()).then(done,fail);
       else if(name==="addExpense") fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"add",e:a[0],pass:a[1]})}).then(r=>r.json()).then(done,fail);
     };}});}
   return mk();})()}};
@@ -312,7 +324,7 @@ const icon=(c,col,sw)=>`<svg viewBox="0 0 24 24" style="stroke:${col}" ${sw?`str
 
 /* ---------- data ---------- */
 let ROWS=[];
-function toRows(arr){ return arr.map(r=>({d:new Date(r[0]+"T00:00:00"),iso:r[0],a:+r[1]||0,p:r[2]||"",c:r[3]||"Uncategorised",nw:r[4]||"",n:r[5]||"",f:r[6]||"",s:r[7]||"",ts:r[8]||""})); }
+function toRows(arr){ return arr.map(r=>({d:new Date(r[0]+"T00:00:00"),iso:r[0],a:+r[1]||0,p:r[2]||"",c:r[3]||"Uncategorised",nw:r[4]||"",n:r[5]||"",f:r[6]||"",s:r[7]||"",ts:r[8]||"",rn:r[9]||0})); }
 let LOADING=true;
 
 function parseCSV(t){ const out=[];let row=[],f="",q=false;
@@ -458,7 +470,7 @@ function txHTML(r,withIcon){
   const meta=[fmtDate(r),`Paid by ${esc(r.p||"—")}`];
   const chips=[]; if(r.nw) chips.push(`<span class="chip ${r.nw==='Want'?'w':'nd'}">${esc(r.nw)}</span>`);
   if(r.f) chips.push(`<span class="chip">For ${esc(r.f)}</span>`); if(r.s) chips.push(`<span class="chip">${esc(r.s)}</span>`);
-  return `<div class="tx">${withIcon?`<span class="ic">${icon(r.c,catMeta(r.c)[1])}</span>`:''}<span class="n">${esc(r.n||r.c)}</span><span class="amt num">${inr(r.a)}</span>
+  return `<div class="tx" data-rn="${r.rn}">${withIcon?`<span class="ic">${icon(r.c,catMeta(r.c)[1])}</span>`:''}<span class="n">${esc(r.n||r.c)}</span><span class="amt num">${inr(r.a)}</span>
     <span class="m"><span>${meta.join(" · ")}</span>${chips.join("")}</span></div>`;
 }
 const byRecent=(a,b)=>(b.iso.localeCompare(a.iso))||(b.ts.localeCompare(a.ts));
@@ -500,7 +512,8 @@ function render(){
   document.getElementById('pillAmt').textContent=inr(rows.reduce((s,r)=>s+r.a,0));
   const list=S.view==="list";
   document.getElementById('stage').hidden=list; document.getElementById('ledger').hidden=!list;
-  ['listL','listR'].forEach(id=>document.getElementById(id).setAttribute('aria-pressed',String(list)));
+  document.getElementById('listL').setAttribute('aria-pressed',String(list));
+  { const t=isoDay(today()); const v=filtered(false).filter(r=>r.iso===t).reduce((s,r)=>s+r.a,0); document.getElementById('todayAmt').textContent=inr(v); }
   if(list) drawLedger(rows); else drawChart(rows);
 }
 function go(dir){ if(S.mode==="all") return; lastDir=dir; if(S.mode==="interval") shiftInterval(dir); else S.anchor=shift(S.mode,S.anchor,dir); S.open.clear(); render(); }
@@ -508,7 +521,8 @@ document.getElementById('prevBtn').onclick=()=>go(-1);
 document.getElementById('nextBtn').onclick=()=>go(1);
 document.getElementById('curBtn').onclick=()=>openDrawer();
 document.getElementById('pill').onclick=()=>setView(S.view==="list"?"chart":"list");
-document.getElementById('listL').onclick=document.getElementById('listR').onclick=()=>setView(S.view==="list"?"chart":"list");
+document.getElementById('listL').onclick=()=>setView(S.view==="list"?"chart":"list");
+document.getElementById('todayBtn').onclick=()=>{ S.mode="day"; store.set("mode","day"); S.anchor=today(); S.open.clear(); setView("list"); };
 document.addEventListener('keydown',e=>{ if(e.target.closest('input,.drawer,.sheet'))return; if(e.key==="ArrowLeft")go(-1); if(e.key==="ArrowRight")go(1); });
 (()=>{ let x0=null,y0=0; const zone=document.querySelector('main');
   zone.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY;},{passive:true});
@@ -554,11 +568,13 @@ document.getElementById('closeSearch').onclick=closeSearch; q.oninput=doSearch;
 const syncEl=document.getElementById('sync'), syncTxt=document.getElementById('syncTxt'), syncBtn=document.getElementById('syncBtn');
 const fmtWhen=ms=>{const d=new Date(ms); return `${d.getDate()} ${MON[d.getMonth()]}, ${d.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'})}`;};
 function setSync(kind,txt){ syncEl.className="sync "+kind; syncTxt.textContent=txt; }
-let USER="", loading=false;
+let USER="", loading=false, CACHE_AT=0;
+{ const c=store.get("cache",null); if(c&&c.rows&&c.rows.length){ ROWS=toRows(c.rows); LOADING=false; CACHE_AT=c.at||0; } }
 function applyData(d){
   LOADING=false; ROWS=toRows(d.rows||[]); USER=(d.user||"").toLowerCase();
+  store.set("cache",{rows:d.rows||[],at:Date.now()});
   render(); if(!drawer.hidden) buildDrawer(); if(!sheet.hidden) doSearch();
-  setSync("live",`Live · ${ROWS.length.toLocaleString('en-IN')} entries · synced ${fmtWhen(Date.now())}`);
+  CACHE_AT=Date.now(); setSync("live",`Live · ${ROWS.length.toLocaleString('en-IN')} entries · synced ${fmtWhen(Date.now())}`);
 }
 const gate=document.getElementById('gate'), gIn=document.getElementById('gIn'), gErr=document.getElementById('gErr');
 const PW=()=>store.get("pass","");
@@ -568,15 +584,15 @@ function errText(e){ const m=String(e&&e.message||e||"");
   if(/PASSCODE/.test(m)){ store.set("pass",""); askPass("Wrong passcode. Ask Aditya."); return "Passcode needed."; }
   if(/permission|access|not have|denied|authoriz/i.test(m)) return "This Google account can't open the expense sheet. Ask Aditya to share it with you.";
   return m || "Couldn't reach Google just now. Tap Sync to try again."; }
-function pull(){ if(loading) return; if(!PW()){ askPass(); return; } loading=true; syncBtn.classList.add('spin'); if(!ROWS.length) setSync("","Loading your sheet…");
+function pull(){ if(loading) return; if(!PW()){ askPass(); return; } loading=true; syncBtn.classList.add('spin'); if(!ROWS.length) setSync("","Loading your sheet…"); else setSync("",`Showing saved copy from ${fmtWhen(CACHE_AT)} · updating…`);
   google.script.run.withSuccessHandler(d=>{loading=false; syncBtn.classList.remove('spin'); applyData(d);})
-    .withFailureHandler(e=>{loading=false; syncBtn.classList.remove('spin'); LOADING=false; render(); setSync("warn",errText(e));}).getData(PW()); }
+    .withFailureHandler(e=>{loading=false; syncBtn.classList.remove('spin'); LOADING=false; render(); const m=errText(e); if(ROWS.length&&!/PASSCODE/.test(String(e&&e.message||e))) setSync("warn",`Offline copy · last synced ${fmtWhen(CACHE_AT)} · tap Sync`); else setSync("warn",m);}).getData(PW()); }
 syncBtn.onclick=pull;
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==="visible") pull(); });
 
 /* ---------- add expense: keypad → choose category → saved ---------- */
 const add=document.getElementById('addSheet'), toast=document.getElementById('toast');
-const A={expr:"",paid:"Aditya",nw:"Need",forW:"Shared",step:"pad",saving:false};
+const A={expr:"",paid:"Aditya",nw:"Need",forW:"Shared",step:"pad",saving:false,edit:null};
 const isoDay=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 const aDate=document.getElementById('aDate'), aVal=document.getElementById('aVal'), aErr=document.getElementById('aErr');
 function evalExpr(s){ // digits, ".", + − × ÷ with normal precedence; no eval()
@@ -605,16 +621,23 @@ function catOrder(){ const m=new Map(); ROWS.forEach(r=>m.set(r.c,(m.get(r.c)||0
   return [...m.keys()].sort((a,b)=>a.localeCompare(b)); }
 function setStep(s){ A.step=s; document.getElementById('aPad').hidden=s!=="pad"; document.getElementById('aCats').hidden=s!=="cats"; document.getElementById('aSub').hidden=s!=="sub";
   if(s==="cats"){ const g=document.getElementById('aCats');
-    g.innerHTML=catOrder().map(c=>{const col=catMeta(c)[1]; return `<button type="button" class="card" data-c="${esc(c)}" style="--cc:${col}">${icon(c,col)}<span>${esc(c)}</span></button>`;}).join("");
+    g.innerHTML=catOrder().map(c=>{const col=catMeta(c)[1]; return `<button type="button" class="card" data-c="${esc(c)}" style="--cc:${col}"${A.edit&&A.edit.c===c?' data-sel="1"':''}>${icon(c,col)}<span>${esc(c)}</span></button>`;}).join("");
+    g.querySelectorAll('[data-sel]').forEach(b=>b.classList.add('sel'));
     g.querySelectorAll('.card').forEach(b=>b.onclick=()=>{ if(b.dataset.c==="House") setStep("sub"); else save(b.dataset.c,"",b); });
     g.scrollTop=0; } }
 document.querySelectorAll('#aSub .card').forEach(b=>b.onclick=()=>save("House",b.dataset.s,b));
 function openAdd(){
-  A.expr=""; A.paid=store.get("lastPaid",/jayswal|spardha/.test(USER)?"Choti":"Aditya"); A.nw="Need"; A.forW="Shared"; A.saving=false;
+  A.expr=""; A.paid=store.get("lastPaid",/jayswal|spardha/.test(USER)?"Choti":"Aditya"); A.nw="Need"; A.forW="Shared"; A.saving=false; A.edit=null; document.getElementById('addTitle').textContent="New expense";
   aDate.value=isoDay(today()); document.getElementById('aDateTxt').textContent=dateLabel();
   document.getElementById('aNote').value=""; aErr.textContent=""; document.getElementById('aWho').textContent=A.paid;
   chips('aNw',["Need","Want"],"nw"); chips('aFor',["Shared","Aditya","Choti","Other"],"forW");
   showVal(); setStep("pad"); add.hidden=false;
+}
+function openEdit(r){
+  openAdd(); A.edit=r; document.getElementById('addTitle').textContent="Edit expense";
+  A.expr=String(r.a); A.paid=r.p==="Choti"?"Choti":"Aditya"; A.nw=r.nw==="Want"?"Want":"Need"; A.forW=r.f||"Shared";
+  aDate.value=r.iso; document.getElementById('aDateTxt').textContent=dateLabel(); document.getElementById('aNote').value=r.n||"";
+  document.getElementById('aWho').textContent=A.paid; chips('aNw',["Need","Want"],"nw"); chips('aFor',["Shared","Aditya","Choti","Other"],"forW"); showVal();
 }
 function closeAdd(){ if(A.saving) return; add.hidden=true; }
 document.getElementById('addBtn').onclick=openAdd;
@@ -628,14 +651,26 @@ add.addEventListener('keydown',e=>{ if(e.target.id==="aNote"||add.hidden) return
   const m={"*":"×","/":"÷","Enter":"="}; const k=m[e.key]||e.key; if(/^[\d.+\-×÷=]$/.test(k)){ e.preventDefault(); key(k);} else if(e.key==="Backspace"){ e.preventDefault(); A.expr=A.expr.slice(0,-1); showVal(); } });
 function save(cat,sub,btn){
   if(A.saving) return; const amt=evalExpr(A.expr); if(!(amt>0)){ setStep("pad"); aErr.textContent="Enter the amount first."; return; }
-  A.saving=true; btn.classList.add('busy'); aErr.textContent="";
+  A.saving=true; btn.classList.add('busy'); aErr.textContent=""; const ed=A.edit;
   const payload={amount:amt,category:cat,houseSub:sub,paidBy:A.paid,needWant:A.nw,expenseFor:A.forW,date:aDate.value,note:document.getElementById('aNote').value.trim()};
+  if(ed){ payload.row=ed.rn; payload.ts=ed.ts; payload.oldAmt=ed.a; }
   google.script.run.withSuccessHandler(d=>{ A.saving=false; btn.classList.remove('busy'); add.hidden=true; applyData(d);
-      toast.textContent=`Saved ${inr(amt)} · ${cat}${sub?" ("+sub.replace("House - ","")+")":""}`; toast.hidden=false; setTimeout(()=>toast.hidden=true,2600); })
+      toast.textContent=`${ed?"Updated":"Saved"} ${inr(amt)} · ${cat}${sub?" ("+sub.replace("House - ","")+")":""}`; toast.hidden=false; setTimeout(()=>toast.hidden=true,2600); })
     .withFailureHandler(x=>{ A.saving=false; btn.classList.remove('busy'); aErr.textContent=errText(x)+" Tap Sync to check whether it was saved before trying again."; })
-    .addExpense(payload,PW());
+    [ed?"updateExpense":"addExpense"](payload,PW());
 }
 document.addEventListener('keydown',e=>{ if(e.key==="Escape") closeAdd(); });
+
+/* ---------- tap an entry → edit ---------- */
+const eSheet=document.getElementById('eSheet'); let eRow=null;
+function openEntry(rn){ const r=ROWS.find(x=>x.rn===rn); if(!r) return; eRow=r;
+  document.getElementById('eT').textContent=`${r.n||r.c} · ${inr(r.a)}`;
+  document.getElementById('eS').textContent=`${r.c}${r.s?" ("+r.s.replace("House - ","")+")":""} · ${fmtDate(r)} · Paid by ${r.p||"—"}`;
+  eSheet.hidden=false; }
+document.addEventListener('click',e=>{ const t=e.target.closest('.tx[data-rn]'); if(t&&!e.target.closest('#addSheet,#eSheet')&&+t.dataset.rn) openEntry(+t.dataset.rn); });
+document.getElementById('eClose').onclick=()=>{eSheet.hidden=true;};
+eSheet.addEventListener('click',e=>{ if(e.target===eSheet) eSheet.hidden=true; });
+document.getElementById('eEdit').onclick=()=>{ eSheet.hidden=true; if(!sheet.hidden) closeSearch(); openEdit(eRow); };
 
 render(); pull();
 })();
