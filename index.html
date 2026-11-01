@@ -396,6 +396,11 @@ html.skinning *{transition:background-color .4s ease,color .4s ease,border-color
   --accent:#FFC266;--spend:#FF7A85;--spend-soft:#3A1E28;--ok:#4FD1A0;--chip:rgba(120,140,190,.18);--scrim:rgba(0,0,0,.5);--bar:rgba(10,16,32,.8);--press:rgba(255,255,255,.06);color-scheme:dark}
 :root[data-skin="sage"]{--bg:#F3F4EE;--surface:#FFFFFF;--ink:#1F2A1E;--muted:#7C8676;--line:rgba(70,90,60,.15);--tint:#4F7A3F;--head:#4F7A3F;--head-ink:#FFFFFF;--head-muted:rgba(255,255,255,.8);
   --accent:#D08A2E;--spend:#C4473D;--spend-soft:#F6E3E0;--ok:#4F8A4F;--chip:rgba(79,122,63,.10);--scrim:rgba(30,40,25,.3);--bar:rgba(243,244,238,.82);--press:rgba(79,122,63,.06);color-scheme:light}
+/* moving category tiles */
+.cgrid .card{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.cgrid.sorting .card{animation:none}
+.cgrid.sorting{overflow:auto}
+.card.lift{position:relative;z-index:5;box-shadow:0 14px 34px rgba(0,0,0,.28),inset 0 0 0 2px var(--tint)}
 /* motion — only when the phone allows it */
 @media (prefers-reduced-motion:no-preference){
   .stage svg.in,.ledger.in{animation:slidein .38s var(--ease)}
@@ -911,12 +916,37 @@ function dateLabel(){ const d=fromISO(aDate.value||isoDay(today())); return `${[
 function chips(id,opts,k){ const el=document.getElementById(id); el.innerHTML=opts.map(o=>`<button type="button" aria-pressed="${A[k]===o}">${esc(o)}</button>`).join("");
   el.querySelectorAll('button').forEach((b,i)=>b.onclick=()=>{A[k]=opts[i]; chips(id,opts,k);}); }
 function catOrder(){ const m=new Map(); ROWS.forEach(r=>m.set(r.c,(m.get(r.c)||0)+1)); Object.keys(CATS).filter(c=>c!=="Others").forEach(c=>{if(!m.has(c))m.set(c,0);});
-  return [...m.keys()].sort((a,b)=>a.localeCompare(b)); }
-function setStep(s){ A.step=s; document.getElementById('catHint').hidden=s==="pad"; document.getElementById('catHint').textContent=A.edit?"Tap a category to save your changes":"Tap a category to save"; document.getElementById('aPad').hidden=s!=="pad"; document.getElementById('aCats').hidden=s!=="cats"; document.getElementById('aSub').hidden=s!=="sub";
+  const base=[...m.keys()].sort((a,b)=>a.localeCompare(b)), saved=store.get("catOrder",[]).filter(c=>base.includes(c));
+  return [...saved,...base.filter(c=>!saved.includes(c))]; }
+/* long-press a category tile, then drag it anywhere; the order is remembered on this phone */
+let catDragAt=0;
+(()=>{ const g=document.getElementById('aCats'); let timer=null, d=null, sx=0, sy=0;
+  const pos=c=>({x:c.offsetLeft,y:c.offsetTop-g.scrollTop});
+  function flip(move){ const cs=[...g.children], before=new Map(cs.map(c=>[c,c.getBoundingClientRect()])); move();
+    cs.forEach(c=>{ if(c===d.c) return; const a=before.get(c), b=c.getBoundingClientRect(), dx=a.left-b.left, dy=a.top-b.top; if(!dx&&!dy) return;
+      c.style.transition='none'; c.style.transform=`translate(${dx}px,${dy}px)`; requestAnimationFrame(()=>{ c.style.transition='transform .28s cubic-bezier(.32,.72,0,1)'; c.style.transform=''; }); }); }
+  function follow(t){ const p=pos(d.c); d.c.style.transform=`translate(${t.clientX-sx-(p.x-d.p0.x)}px,${t.clientY-sy-(p.y-d.p0.y)}px) scale(1.07)`; }
+  g.addEventListener('contextmenu',e=>e.preventDefault());
+  g.addEventListener('touchstart',e=>{ const c=e.target.closest('.card'); if(!c||e.touches.length>1) return; sx=e.touches[0].clientX; sy=e.touches[0].clientY; clearTimeout(timer);
+    timer=setTimeout(()=>{ d={c,p0:pos(c)}; g.classList.add('sorting'); c.classList.add('lift'); c.style.transition='none'; c.style.transform='scale(1.07)'; try{navigator.vibrate&&navigator.vibrate(12);}catch(_){} },420); },{passive:true});
+  g.addEventListener('touchmove',e=>{ const t=e.touches[0];
+    if(!d){ if(Math.hypot(t.clientX-sx,t.clientY-sy)>8) clearTimeout(timer); return; }
+    e.preventDefault();
+    const gr=g.getBoundingClientRect(); if(t.clientY>gr.bottom-56) g.scrollTop+=10; else if(t.clientY<gr.top+40) g.scrollTop-=10;
+    d.c.style.pointerEvents='none'; const over=document.elementFromPoint(t.clientX,t.clientY)?.closest('#aCats .card'); d.c.style.pointerEvents='';
+    if(over&&over!==d.c){ const cs=[...g.children], from=cs.indexOf(d.c), to=cs.indexOf(over); flip(()=>{ if(from<to) over.after(d.c); else over.before(d.c); }); }
+    follow(t); },{passive:false});
+  const end=()=>{ clearTimeout(timer); if(!d) return; const c=d.c; d=null; catDragAt=Date.now();
+    c.style.transition='transform .3s cubic-bezier(.32,.72,0,1)'; c.style.transform=''; c.classList.remove('lift');
+    setTimeout(()=>{ c.style.transition=''; g.classList.remove('sorting'); },320);
+    store.set("catOrder",[...g.children].map(x=>x.dataset.c)); };
+  g.addEventListener('touchend',end); g.addEventListener('touchcancel',end);
+})();
+function setStep(s){ A.step=s; document.getElementById('catHint').hidden=s==="pad"; document.getElementById('catHint').textContent=A.edit?"Tap a category to save your changes · long-press to move it":"Tap a category to save · long-press to move it"; document.getElementById('aPad').hidden=s!=="pad"; document.getElementById('aCats').hidden=s!=="cats"; document.getElementById('aSub').hidden=s!=="sub";
   if(s==="cats"){ const g=document.getElementById('aCats');
     g.innerHTML=catOrder().map(c=>{const col=catMeta(c)[1]; return `<button type="button" class="card" data-c="${esc(c)}" style="--cc:${col}"${A.edit&&A.edit.c===c?' data-sel="1"':''}>${icon(c,col)}<span>${esc(c)}</span></button>`;}).join("");
     g.querySelectorAll('[data-sel]').forEach(b=>b.classList.add('sel'));
-    g.querySelectorAll('.card').forEach(b=>b.onclick=()=>{ if(b.dataset.c==="House"){ setStep("sub"); ovOpen(toCats); } else save(b.dataset.c,"",b); });
+    g.querySelectorAll('.card').forEach(b=>b.onclick=()=>{ if(Date.now()-catDragAt<600) return; if(b.dataset.c==="House"){ setStep("sub"); ovOpen(toCats); } else save(b.dataset.c,"",b); });
     g.scrollTop=0; } }
 document.querySelectorAll('#aSub .card').forEach(b=>b.onclick=()=>save("House",b.dataset.s,b));
 function openAdd(){
@@ -989,7 +1019,7 @@ document.addEventListener('click',e=>{ if(Date.now()-swipedAt<400) return;
   document.addEventListener('touchend',()=>{ if(!w) return; if(drag){ const tx=w.querySelector('.tx'); tx.style.transition=''; tx.style.transform=''; w.classList.toggle('open',dx<-W/2); swipedAt=Date.now(); } w=null; },{passive:true});
 })();
 /* updates: a banner when a new version is published */
-const APP_VERSION="1.5";
+const APP_VERSION="1.6";
 document.getElementById('verTxt').textContent="Version "+APP_VERSION;
 async function checkUpdate(manual){ try{ const j=await (await fetch('version.json?t='+Date.now(),{cache:'no-store'})).json();
     if(j.v&&j.v!==APP_VERSION){ document.getElementById('updTxt').textContent=j.note?`New version: ${j.note}`:"A new version is ready"; document.getElementById('upd').hidden=false; }
