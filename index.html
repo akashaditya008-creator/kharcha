@@ -396,6 +396,9 @@ html.skinning *{transition:background-color .4s ease,color .4s ease,border-color
   --accent:#FFC266;--spend:#FF7A85;--spend-soft:#3A1E28;--ok:#4FD1A0;--chip:rgba(120,140,190,.18);--scrim:rgba(0,0,0,.5);--bar:rgba(10,16,32,.8);--press:rgba(255,255,255,.06);color-scheme:dark}
 :root[data-skin="sage"]{--bg:#F3F4EE;--surface:#FFFFFF;--ink:#1F2A1E;--muted:#7C8676;--line:rgba(70,90,60,.15);--tint:#4F7A3F;--head:#4F7A3F;--head-ink:#FFFFFF;--head-muted:rgba(255,255,255,.8);
   --accent:#D08A2E;--spend:#C4473D;--spend-soft:#F6E3E0;--ok:#4F8A4F;--chip:rgba(79,122,63,.10);--scrim:rgba(30,40,25,.3);--bar:rgba(243,244,238,.82);--press:rgba(79,122,63,.06);color-scheme:light}
+/* app-like: no text selection / copy menu on long-press, except where you type */
+html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 /* moving category tiles */
 .cgrid .card{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;position:relative}
 .cgrid.sorting .card{animation:none}
@@ -922,6 +925,9 @@ function chips(id,opts,k){ const el=document.getElementById(id); el.innerHTML=op
 function catOrder(){ const m=new Map(); ROWS.forEach(r=>m.set(r.c,(m.get(r.c)||0)+1)); Object.keys(CATS).filter(c=>c!=="Others").forEach(c=>{if(!m.has(c))m.set(c,0);});
   const base=[...m.keys()].sort((a,b)=>a.localeCompare(b)), saved=store.get("catOrder",[]).filter(c=>base.includes(c));
   return [...saved,...base.filter(c=>!saved.includes(c))]; }
+const typing=e=>e.target.closest&&e.target.closest('input,textarea');
+document.addEventListener('contextmenu',e=>{ if(!typing(e)) e.preventDefault(); });
+document.addEventListener('selectstart',e=>{ if(!typing(e)) e.preventDefault(); });
 /* long-press a category tile and drag it:
    drop on the middle of a tile → the two swap places;
    drop on a tile's left edge → goes before it (that tile moves right);
@@ -1038,7 +1044,7 @@ document.addEventListener('click',e=>{ if(Date.now()-swipedAt<400) return;
   document.addEventListener('touchend',()=>{ if(!w) return; if(drag){ const tx=w.querySelector('.tx'); tx.style.transition=''; tx.style.transform=''; w.classList.toggle('open',dx<-W/2); swipedAt=Date.now(); } w=null; },{passive:true});
 })();
 /* updates: a banner when a new version is published */
-const APP_VERSION="1.7";
+const APP_VERSION="1.8";
 document.getElementById('verTxt').textContent="Version "+APP_VERSION;
 async function checkUpdate(manual){ try{ const j=await (await fetch('version.json?t='+Date.now(),{cache:'no-store'})).json();
     if(j.v&&j.v!==APP_VERSION){ document.getElementById('updTxt').textContent=j.note?`New version: ${j.note}`:"A new version is ready"; document.getElementById('upd').hidden=false; }
