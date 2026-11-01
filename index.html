@@ -397,10 +397,14 @@ html.skinning *{transition:background-color .4s ease,color .4s ease,border-color
 :root[data-skin="sage"]{--bg:#F3F4EE;--surface:#FFFFFF;--ink:#1F2A1E;--muted:#7C8676;--line:rgba(70,90,60,.15);--tint:#4F7A3F;--head:#4F7A3F;--head-ink:#FFFFFF;--head-muted:rgba(255,255,255,.8);
   --accent:#D08A2E;--spend:#C4473D;--spend-soft:#F6E3E0;--ok:#4F8A4F;--chip:rgba(79,122,63,.10);--scrim:rgba(30,40,25,.3);--bar:rgba(243,244,238,.82);--press:rgba(79,122,63,.06);color-scheme:light}
 /* moving category tiles */
-.cgrid .card{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.cgrid .card{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;position:relative}
 .cgrid.sorting .card{animation:none}
-.cgrid.sorting{overflow:auto}
-.card.lift{position:relative;z-index:5;box-shadow:0 14px 34px rgba(0,0,0,.28),inset 0 0 0 2px var(--tint)}
+.cgrid.sorting .card:active{transform:none}
+.card.lift{z-index:5;pointer-events:none;will-change:transform;box-shadow:0 16px 36px rgba(0,0,0,.32),inset 0 0 0 2px var(--tint);opacity:.82}
+.card.drop-swap{box-shadow:inset 0 0 0 2px var(--tint);background:color-mix(in srgb,var(--tint) 12%,var(--surface))}
+.card.drop-swap::after{content:"⇄ swap";position:absolute;top:6px;right:8px;font:600 10px var(--body);color:var(--tint)}
+.card.drop-before::before,.card.drop-after::before{content:"";position:absolute;top:12%;bottom:12%;width:4px;border-radius:2px;background:var(--tint);box-shadow:0 0 0 3px color-mix(in srgb,var(--tint) 25%,transparent)}
+.card.drop-before::before{left:-7px} .card.drop-after::before{right:-7px}
 /* motion — only when the phone allows it */
 @media (prefers-reduced-motion:no-preference){
   .stage svg.in,.ledger.in{animation:slidein .38s var(--ease)}
@@ -918,27 +922,42 @@ function chips(id,opts,k){ const el=document.getElementById(id); el.innerHTML=op
 function catOrder(){ const m=new Map(); ROWS.forEach(r=>m.set(r.c,(m.get(r.c)||0)+1)); Object.keys(CATS).filter(c=>c!=="Others").forEach(c=>{if(!m.has(c))m.set(c,0);});
   const base=[...m.keys()].sort((a,b)=>a.localeCompare(b)), saved=store.get("catOrder",[]).filter(c=>base.includes(c));
   return [...saved,...base.filter(c=>!saved.includes(c))]; }
-/* long-press a category tile, then drag it anywhere; the order is remembered on this phone */
+/* long-press a category tile and drag it:
+   drop on the middle of a tile → the two swap places;
+   drop on a tile's left edge → goes before it (that tile moves right);
+   drop on a tile's right edge → goes after it (that tile moves left).
+   Only the lifted tile moves while dragging; the grid rearranges once, on release. */
 let catDragAt=0;
-(()=>{ const g=document.getElementById('aCats'); let timer=null, d=null, sx=0, sy=0;
-  const pos=c=>({x:c.offsetLeft,y:c.offsetTop-g.scrollTop});
-  function flip(move){ const cs=[...g.children], before=new Map(cs.map(c=>[c,c.getBoundingClientRect()])); move();
-    cs.forEach(c=>{ if(c===d.c) return; const a=before.get(c), b=c.getBoundingClientRect(), dx=a.left-b.left, dy=a.top-b.top; if(!dx&&!dy) return;
-      c.style.transition='none'; c.style.transform=`translate(${dx}px,${dy}px)`; requestAnimationFrame(()=>{ c.style.transition='transform .28s cubic-bezier(.32,.72,0,1)'; c.style.transform=''; }); }); }
-  function follow(t){ const p=pos(d.c); d.c.style.transform=`translate(${t.clientX-sx-(p.x-d.p0.x)}px,${t.clientY-sy-(p.y-d.p0.y)}px) scale(1.07)`; }
+(()=>{ const g=document.getElementById('aCats'); let timer=null, d=null, sx=0, sy=0, fx=0, fy=0, raf=0;
+  const EASE='cubic-bezier(.32,.72,0,1)';
+  function clearMark(){ if(d&&d.t){ d.t.classList.remove('drop-swap','drop-before','drop-after'); } }
+  function target(){ const el=document.elementFromPoint(fx,fy), t=el&&el.closest('#aCats .card'); if(!t||t===d.c) return null;
+    const r=t.getBoundingClientRect(), k=(fx-r.left)/r.width; return {t,mode:k<.28?'before':k>.72?'after':'swap'}; }
+  function tick(){ if(!d) return;
+    const gr=g.getBoundingClientRect(); if(fy>gr.bottom-60) g.scrollTop+=8; else if(fy<gr.top+44) g.scrollTop-=8;
+    d.c.style.transform=`translate3d(${fx-sx}px,${fy-sy+(g.scrollTop-d.s0)}px,0) scale(1.06)`;
+    const n=target(); if(!n||n.t!==d.t||n.mode!==d.mode){ clearMark(); d.t=n&&n.t; d.mode=n&&n.mode; if(n) n.t.classList.add('drop-'+n.mode); }
+    raf=requestAnimationFrame(tick); }
+  function flipAll(move){ const cs=[...g.children], before=new Map(cs.map(c=>[c,c.getBoundingClientRect()]));
+    move(); d.c.style.transform=''; 
+    cs.forEach(c=>{ const a=before.get(c), b=c.getBoundingClientRect(), dx=a.left-b.left, dy=a.top-b.top; if(!dx&&!dy&&c!==d.c) return;
+      c.style.transition='none'; c.style.transform=`translate3d(${dx}px,${dy}px,0)${c===d.c?' scale(1.06)':''}`; });
+    g.offsetWidth; // apply start positions in one go, then glide to the new layout
+    cs.forEach(c=>{ if(!c.style.transform) return; c.style.transition=`transform .32s ${EASE}`; c.style.transform=''; });
+    setTimeout(()=>cs.forEach(c=>{ c.style.transition=''; }),360); }
   g.addEventListener('contextmenu',e=>e.preventDefault());
-  g.addEventListener('touchstart',e=>{ const c=e.target.closest('.card'); if(!c||e.touches.length>1) return; sx=e.touches[0].clientX; sy=e.touches[0].clientY; clearTimeout(timer);
-    timer=setTimeout(()=>{ d={c,p0:pos(c)}; g.classList.add('sorting'); c.classList.add('lift'); c.style.transition='none'; c.style.transform='scale(1.07)'; try{navigator.vibrate&&navigator.vibrate(12);}catch(_){} },420); },{passive:true});
-  g.addEventListener('touchmove',e=>{ const t=e.touches[0];
-    if(!d){ if(Math.hypot(t.clientX-sx,t.clientY-sy)>8) clearTimeout(timer); return; }
-    e.preventDefault();
-    const gr=g.getBoundingClientRect(); if(t.clientY>gr.bottom-56) g.scrollTop+=10; else if(t.clientY<gr.top+40) g.scrollTop-=10;
-    d.c.style.pointerEvents='none'; const over=document.elementFromPoint(t.clientX,t.clientY)?.closest('#aCats .card'); d.c.style.pointerEvents='';
-    if(over&&over!==d.c){ const cs=[...g.children], from=cs.indexOf(d.c), to=cs.indexOf(over); flip(()=>{ if(from<to) over.after(d.c); else over.before(d.c); }); }
-    follow(t); },{passive:false});
-  const end=()=>{ clearTimeout(timer); if(!d) return; const c=d.c; d=null; catDragAt=Date.now();
-    c.style.transition='transform .3s cubic-bezier(.32,.72,0,1)'; c.style.transform=''; c.classList.remove('lift');
-    setTimeout(()=>{ c.style.transition=''; g.classList.remove('sorting'); },320);
+  g.addEventListener('touchstart',e=>{ const c=e.target.closest('.card'); if(!c||e.touches.length>1) return; sx=fx=e.touches[0].clientX; sy=fy=e.touches[0].clientY; clearTimeout(timer);
+    timer=setTimeout(()=>{ d={c,s0:g.scrollTop,t:null,mode:null}; g.classList.add('sorting'); c.classList.add('lift'); c.style.transition='none';
+      try{navigator.vibrate&&navigator.vibrate(12);}catch(_){} raf=requestAnimationFrame(tick); },400); },{passive:true});
+  g.addEventListener('touchmove',e=>{ const t=e.touches[0]; fx=t.clientX; fy=t.clientY;
+    if(!d){ if(Math.hypot(fx-sx,fy-sy)>8) clearTimeout(timer); return; }
+    e.preventDefault(); },{passive:false});
+  const end=()=>{ clearTimeout(timer); if(!d) return; cancelAnimationFrame(raf); catDragAt=Date.now();
+    const {c,t,mode}=d; clearMark();
+    flipAll(()=>{ if(t&&mode==='before') t.before(c); else if(t&&mode==='after') t.after(c);
+      else if(t&&mode==='swap'){ const ph=document.createElement('i'); c.before(ph); t.before(c); ph.replaceWith(t); } });
+    c.classList.remove('lift'); try{ if(t) navigator.vibrate&&navigator.vibrate(8);}catch(_){}
+    d=null; setTimeout(()=>g.classList.remove('sorting'),360);
     store.set("catOrder",[...g.children].map(x=>x.dataset.c)); };
   g.addEventListener('touchend',end); g.addEventListener('touchcancel',end);
 })();
@@ -1019,7 +1038,7 @@ document.addEventListener('click',e=>{ if(Date.now()-swipedAt<400) return;
   document.addEventListener('touchend',()=>{ if(!w) return; if(drag){ const tx=w.querySelector('.tx'); tx.style.transition=''; tx.style.transform=''; w.classList.toggle('open',dx<-W/2); swipedAt=Date.now(); } w=null; },{passive:true});
 })();
 /* updates: a banner when a new version is published */
-const APP_VERSION="1.6";
+const APP_VERSION="1.7";
 document.getElementById('verTxt').textContent="Version "+APP_VERSION;
 async function checkUpdate(manual){ try{ const j=await (await fetch('version.json?t='+Date.now(),{cache:'no-store'})).json();
     if(j.v&&j.v!==APP_VERSION){ document.getElementById('updTxt').textContent=j.note?`New version: ${j.note}`:"A new version is ready"; document.getElementById('upd').hidden=false; }
