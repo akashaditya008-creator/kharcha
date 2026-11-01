@@ -627,7 +627,7 @@ function setStep(s){ A.step=s; document.getElementById('aPad').hidden=s!=="pad";
     g.scrollTop=0; } }
 document.querySelectorAll('#aSub .card').forEach(b=>b.onclick=()=>save("House",b.dataset.s,b));
 function openAdd(){
-  A.expr=""; A.paid=store.get("lastPaid",/jayswal|spardha/.test(USER)?"Choti":"Aditya"); A.nw="Need"; A.forW="Shared"; A.saving=false; A.edit=null; document.getElementById('addTitle').textContent="New expense";
+  A.expr=""; A.paid=store.get("lastPaid",/jayswal|spardha/.test(USER)?"Choti":"Aditya"); A.nw="Need"; A.forW="Shared"; A.saving=false; A.edit=null; A.rid=Date.now().toString(36)+Math.random().toString(36).slice(2,10); document.getElementById('addTitle').textContent="New expense";
   aDate.value=isoDay(today()); document.getElementById('aDateTxt').textContent=dateLabel();
   document.getElementById('aNote').value=""; aErr.textContent=""; document.getElementById('aWho').textContent=A.paid;
   chips('aNw',["Need","Want"],"nw"); chips('aFor',["Shared","Aditya","Choti","Other"],"forW");
@@ -635,7 +635,7 @@ function openAdd(){
 }
 function openEdit(r){
   openAdd(); A.edit=r; document.getElementById('addTitle').textContent="Edit expense";
-  A.expr=String(r.a); A.paid=r.p==="Choti"?"Choti":"Aditya"; A.nw=r.nw==="Want"?"Want":"Need"; A.forW=r.f||"Shared";
+  A.expr=String(r.a); A.paid=r.p==="Choti"?"Choti":"Aditya"; A.nw=r.nw==="Want"?"Want":"Need"; A.forW=r.f;
   aDate.value=r.iso; document.getElementById('aDateTxt').textContent=dateLabel(); document.getElementById('aNote').value=r.n||"";
   document.getElementById('aWho').textContent=A.paid; chips('aNw',["Need","Want"],"nw"); chips('aFor',["Shared","Aditya","Choti","Other"],"forW"); showVal();
 }
@@ -653,6 +653,7 @@ function save(cat,sub,btn){
   if(A.saving) return; const amt=evalExpr(A.expr); if(!(amt>0)){ setStep("pad"); aErr.textContent="Enter the amount first."; return; }
   A.saving=true; btn.classList.add('busy'); aErr.textContent=""; const ed=A.edit;
   const payload={amount:amt,category:cat,houseSub:sub,paidBy:A.paid,needWant:A.nw,expenseFor:A.forW,date:aDate.value,note:document.getElementById('aNote').value.trim()};
+  payload.rid=A.rid;
   if(ed){ payload.row=ed.rn; payload.ts=ed.ts; payload.oldAmt=ed.a; }
   google.script.run.withSuccessHandler(d=>{ A.saving=false; btn.classList.remove('busy'); add.hidden=true; applyData(d);
       toast.textContent=`${ed?"Updated":"Saved"} ${inr(amt)} · ${cat}${sub?" ("+sub.replace("House - ","")+")":""}`; toast.hidden=false; setTimeout(()=>toast.hidden=true,2600); })
