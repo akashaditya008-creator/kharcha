@@ -326,6 +326,44 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 .gate .logo{width:72px;height:72px;border-radius:18px;justify-self:center;box-shadow:0 6px 20px rgba(0,0,0,.15)}
 .gate input{border:0;border-radius:12px;background:var(--surface);text-align:center}
 .gate button{background:var(--tint);color:var(--head-ink);border-radius:14px;padding:14px}
+/* cues: say what a tap will do */
+.ib.cap{width:auto;min-width:46px;height:48px;border-radius:12px;display:grid;justify-items:center;align-content:center;gap:1px;padding:0 4px;color:var(--tint);text-decoration:none}
+.ib.cap svg{width:21px;height:21px}
+.ib.cap i{font:500 10px var(--body);font-style:normal;letter-spacing:.01em;color:var(--muted)}
+header.top{grid-template-columns:auto 1fr auto}
+.period .cur::after{content:" ▾";font-size:11px;color:var(--muted);vertical-align:1px}
+.pill-row{grid-template-columns:132px 1fr 80px}
+.segv{cursor:pointer}
+.segv button{display:flex;align-items:center;justify-content:center;gap:5px;font:600 13px var(--body);letter-spacing:-.01em}
+.segv button svg{width:17px;height:17px}
+.today small::after{content:" ›";letter-spacing:0}
+.hint{margin:10px 0 0;text-align:center;font-size:12px;color:var(--muted)}
+.ledger .hint{margin:14px 0 4px}
+.tx .amt::after{content:"›";margin-left:8px;color:var(--muted);font-weight:400;opacity:.7}
+.chip.sync{color:var(--tint);background:color-mix(in srgb,var(--tint) 14%,transparent)}
+.dhead{display:flex;align-items:center;justify-content:space-between}
+.done{color:var(--tint);font:600 16px var(--body);padding:8px 4px}
+.ver{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--muted);border-top:.5px solid var(--line);padding-top:12px;order:99}
+.ver button{color:var(--tint);font-weight:600;font-size:13px}
+.drawer{display:flex;flex-direction:column;gap:16px}
+.who b::after{content:" ⇄";font-weight:400;font-size:12px;color:var(--muted)}
+.adate span::after{content:" ▾";font-size:11px;color:var(--muted)}
+.add .hint{margin:0}
+.upd{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:19;display:flex;align-items:center;gap:12px;
+  padding:8px 8px 8px 16px;border-radius:999px;background:var(--surface);box-shadow:0 6px 24px rgba(0,0,0,.16);font-size:13.5px;white-space:nowrap;max-width:calc(100vw - 32px)}
+.upd span{overflow:hidden;text-overflow:ellipsis}
+.upd button{background:var(--tint);color:var(--head-ink);font-weight:600;border-radius:999px;padding:7px 14px;flex:none}
+.eamt{font:700 34px var(--display);letter-spacing:-.03em;color:var(--spend)}
+.esheet .t{font:500 16px var(--body);color:var(--ink)}
+.elist{margin:0;display:grid;grid-template-columns:auto 1fr;background:var(--surface);border-radius:14px;overflow:hidden}
+.elist dt,.elist dd{margin:0;padding:11px 14px;border-bottom:.5px solid var(--line);font-size:14px}
+.elist dt{color:var(--muted)} .elist dd{text-align:right;color:var(--ink)}
+.elist dt:nth-last-of-type(1),.elist dd:last-of-type{border-bottom:0}
+.ecat{display:inline-flex;align-items:center;gap:6px;color:var(--ink)}
+.ecat svg{width:18px;height:18px;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.esheet .s{font-size:12px;text-align:center}
+.esheet .box{max-height:88vh;overflow:auto}
+@media (prefers-reduced-motion:no-preference){ .upd:not([hidden]){animation:toastin .5s var(--ease)} }
 /* motion — only when the phone allows it */
 @media (prefers-reduced-motion:no-preference){
   .stage svg.in,.ledger.in{animation:slidein .38s var(--ease)}
@@ -346,12 +384,12 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 
 <div class="app">
   <header class="top">
-    <button class="ib" id="menuBtn" aria-label="Filters and period"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h12M4 17h8"/></svg></button>
+    <button class="ib cap" id="menuBtn" aria-label="View options: who, what and period"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4.5v5M8 14.5v5"/></svg><i>View</i></button>
     <div class="brand"><h1>Adi &amp; Choti</h1><p id="subtitle">Both · Everyone</p></div>
     <div class="acts">
-      <button class="ib" id="syncBtn" aria-label="Sync now"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-14 5.3M4 12a8 8 0 0 1 14-5.3M18 3v4h-4M6 21v-4h4"/></svg></button>
-      <button class="ib" id="searchBtn" aria-label="Search expenses"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></button>
-      <a class="ib" id="sheetLink" href="#" target="_top" aria-label="Open the Google Sheet" style="color:inherit"><svg viewBox="0 0 24 24"><path d="M5 3h9l5 5v13H5zM14 3v5h5M8 13h8M8 17h8M12 11v8"/></svg></a>
+      <button class="ib cap" id="syncBtn" aria-label="Sync with the sheet now"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-14 5.3M4 12a8 8 0 0 1 14-5.3M18 3v4h-4M6 21v-4h4"/></svg><i>Sync</i></button>
+      <button class="ib cap" id="searchBtn" aria-label="Search all expenses"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg><i>Search</i></button>
+      <a class="ib cap" id="sheetLink" href="#" target="_blank" rel="noopener" aria-label="Open the Google Sheet"><svg viewBox="0 0 24 24"><path d="M5 3h9l5 5v13H5zM14 3v5h5M8 13h8M8 17h8M12 11v8"/></svg><i>Sheet</i></a>
     </div>
   </header>
 
@@ -365,10 +403,11 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
   <main>
     <section class="stage" id="stage" aria-label="Spending by category"></section>
     <div class="pill-row">
-      <div class="segv" role="group" aria-label="View"><button id="viewRing" aria-pressed="true" aria-label="Ring view"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/></svg></button><button id="listL" aria-pressed="false" aria-label="List view"><svg viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14"/></svg></button></div>
+      <div class="segv" id="segv" role="group" aria-label="Switch between chart and list"><button id="viewRing" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M12 4a8 8 0 1 1-7.6 5.5"/><path d="M12 4v4M4.4 9.5l3.8 1.2" opacity=".55"/></svg>Chart</button><button id="listL" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M9 7h11M9 12h11M9 17h11M4.5 7h.01M4.5 12h.01M4.5 17h.01"/></svg>List</button></div>
       <button class="pill num" id="pill" aria-label="Toggle chart and list"><small>Spent</small><span id="pillAmt">₹0</span></button>
       <button class="today" id="todayBtn" aria-label="Spent today, tap to see today"><small>Today</small><b class="num" id="todayAmt">₹0</b></button>
     </div>
+    <p class="hint" id="chartHint">Tap a category to see its entries</p>
     <section id="ledger" class="ledger" hidden></section>
   </main>
 
@@ -377,16 +416,18 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
   </div></div>
 </div>
 
+<div class="upd" id="upd" hidden><span id="updTxt">A new version is ready</span><button type="button" id="updBtn">Update</button></div>
 <div class="ptr" id="ptr" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg></div>
 <div class="scrim" id="scrim" hidden></div>
 <aside class="drawer" id="drawer" hidden aria-label="Filters">
-  <h2>View</h2>
+  <div class="dhead"><h2>View</h2><button class="done" id="drawerDone" type="button">Done</button></div>
   <div><label class="k">Paid by</label><div class="seg" id="fPaid"></div></div>
   <div><label class="k">Expense for</label><div class="seg" id="fFor"></div></div>
   <div><label class="k">Need or want</label><div class="seg" id="fNw"></div></div>
   <div><label class="k">Period</label><div class="periods" id="fPeriod"></div></div>
+  <div class="ver"><span id="verTxt"></span><button type="button" id="verBtn">Check for updates</button></div>
   <div id="intervalBox" hidden><label class="k">Interval</label><div class="dates"><input type="date" id="ivFrom" aria-label="From"><input type="date" id="ivTo" aria-label="To"></div></div>
-  <div><label class="k" for="pickDate">Choose date</label><input type="date" id="pickDate"></div>
+  <div><label class="k" for="pickDate">Jump to a date</label><input type="date" id="pickDate"></div>
 </aside>
 
 <div class="sheet" id="sheet" hidden>
@@ -399,7 +440,7 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 
 <div class="gate" id="gate" hidden><form id="gForm"><img class="logo" src="icon-192.png" alt=""><h2>Adi &amp; Choti Kharcha</h2><p>Enter the family passcode (once on this phone).</p>
 <input id="gIn" type="password" autocomplete="off" aria-label="Passcode"><button type="submit">Open</button><div class="err" id="gErr" role="alert"></div></form></div>
-<div class="esheet" id="eSheet" hidden><div class="box"><div class="t" id="eT"></div><div class="s" id="eS"></div>
+<div class="esheet" id="eSheet" hidden><div class="box"><div class="eamt num" id="eAmt"></div><div class="t" id="eT"></div><dl class="elist" id="eList"></dl><div class="s" id="eS"></div>
 <button class="go" id="eEdit" type="button">Edit this expense</button><button class="x" id="eClose" type="button">Close</button></div></div>
 <div class="add" id="addSheet" hidden>
   <div class="hd">
@@ -425,6 +466,7 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
       <button type="button" data-k=".">.</button><button type="button" data-k="0">0</button><button type="button" class="op" data-k="=" aria-label="equals">=</button><button type="button" class="op" data-k="÷" aria-label="divide">÷</button>
       <button type="button" class="choose" id="aChoose">Choose category</button>
     </div>
+    <p class="hint" id="catHint" hidden>Tap a category to save</p>
     <div class="cgrid" id="aCats" hidden></div>
     <div class="cgrid two" id="aSub" hidden>
       <button type="button" class="card" data-s="House - Running" style="--cc:#4A7FC1"><svg viewBox="0 0 24 24" style="stroke:#4A7FC1"><path d="M3 11.5 12 4l9 7.5M5.5 10v10h13V10M10 20v-6h4v6"/></svg><span>House – Running</span></button>
@@ -442,7 +484,7 @@ window.google={script:{run:(function(){
     if(name==="withFailureHandler") return f=>mk(ok,f);
     return (...a)=>{
       const done=r=>{ if(r&&r.ok) ok&&ok(r.d); else bad&&bad(new Error((r&&r.m)||"Couldn't reach the sheet.")); };
-      const fail=()=>bad&&bad(new Error("Couldn't reach Google just now. Check your internet and tap Sync."));
+      const fail=()=>{ const x=new Error("Couldn't reach Google just now. Check your internet."); x.net=true; bad&&bad(x); };
       if(name==="getData") fetch(API+"?action=get&pass="+encodeURIComponent(a[0]||"")).then(r=>r.json()).then(done,fail);
       else if(name==="updateExpense") fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"edit",e:a[0],pass:a[1]})}).then(r=>r.json()).then(done,fail);
       else if(name==="addExpense") fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"add",e:a[0],pass:a[1]})}).then(r=>r.json()).then(done,fail);
@@ -491,7 +533,7 @@ const icon=(c,col,sw)=>`<svg viewBox="0 0 24 24" style="stroke:${col}" ${sw?`str
 
 /* ---------- data ---------- */
 let ROWS=[];
-function toRows(arr){ return arr.map(r=>({d:new Date(r[0]+"T00:00:00"),iso:r[0],a:+r[1]||0,p:r[2]||"",c:r[3]||"Uncategorised",nw:r[4]||"",n:r[5]||"",f:r[6]||"",s:r[7]||"",ts:r[8]||"",rn:r[9]||0})); }
+function toRows(arr){ return arr.map(r=>({d:new Date(r[0]+"T00:00:00"),iso:r[0],a:+r[1]||0,p:r[2]||"",c:r[3]||"Uncategorised",nw:r[4]||"",n:r[5]||"",f:r[6]||"",s:r[7]||"",ts:r[8]||"",rn:r[9]||0,em:r[10]||""})); }
 let LOADING=true;
 
 function parseCSV(t){ const out=[];let row=[],f="",q=false;
@@ -635,9 +677,9 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",
 /* ---------- ledger ---------- */
 function fmtDate(r){ return `${DOW[r.d.getDay()]} ${r.d.getDate()} ${MON[r.d.getMonth()]}${r.d.getFullYear()!==today().getFullYear()?" "+r.d.getFullYear():""}`; }
 function txHTML(r,withIcon){
-  const meta=[fmtDate(r),`Paid by ${esc(r.p||"—")}`];
+  const meta=[...(withIcon?[esc(r.c)]:[]),fmtDate(r),`Paid by ${esc(r.p||"—")}`];
   const chips=[]; if(r.nw) chips.push(`<span class="chip ${r.nw==='Want'?'w':'nd'}">${esc(r.nw)}</span>`);
-  if(r.f) chips.push(`<span class="chip">For ${esc(r.f)}</span>`); if(r.s) chips.push(`<span class="chip">${esc(r.s)}</span>`);
+  if(r.f) chips.push(`<span class="chip">For ${esc(r.f)}</span>`); if(r.s) chips.push(`<span class="chip">${esc(r.s)}</span>`); if(r.pending) chips.unshift(`<span class="chip sync">Syncing…</span>`);
   return `<div class="txw" data-rn="${r.rn}"><button class="txa" type="button" tabindex="-1" aria-hidden="true">Edit</button><div class="tx">${withIcon?`<span class="ic">${icon(r.c,catMeta(r.c)[1])}</span>`:''}<span class="n">${esc(r.n||r.c)}</span><span class="amt num">${inr(r.a)}</span>
     <span class="m"><span>${meta.join(" · ")}</span>${chips.join("")}</span></div></div>`;
 }
@@ -658,7 +700,7 @@ function drawLedger(rows){
       <svg class="chev" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4"/></svg><span class="cic">${icon(g.c,col)}</span>
       <span class="cname"><span style="color:${col}">${esc(g.c)}</span><span class="badge num">${g.n}</span></span><span class="amt num">${inr(g.sum)}</span></button>
       ${open?`<div class="txs">${g.rows.sort(byRecent).map(r=>txHTML(r)).join("")}</div>`:''}</div>`; }
-  el.innerHTML=h;
+  el.innerHTML=h+`<p class="hint">Tap an entry for details · swipe left on it to edit</p>`;
   el.querySelectorAll('.cat>button').forEach(b=>b.addEventListener('click',()=>{const c=b.parentElement.dataset.c; S.open.has(c)?S.open.delete(c):S.open.add(c); drawLedger(filtered());}));
 }
 function openCat(c){
@@ -683,7 +725,7 @@ function render(){
   document.getElementById('subtitle').textContent=[S.paid==="All"?"Both":S.paid, S.forW==="All"?"For everyone":"For "+S.forW, S.nw==="All"?null:S.nw].filter(Boolean).join(" · ");
   countTo(document.getElementById('pillAmt'),rows.reduce((s,r)=>s+r.a,0));
   const list=S.view==="list";
-  document.getElementById('stage').hidden=list; document.getElementById('ledger').hidden=!list;
+  document.getElementById('stage').hidden=list; document.getElementById('ledger').hidden=!list; document.getElementById('chartHint').hidden=list||!rows.length;
   document.getElementById('listL').setAttribute('aria-pressed',String(list)); document.getElementById('viewRing').setAttribute('aria-pressed',String(!list));
   { const t=isoDay(today()); const v=filtered(false).filter(r=>r.iso===t).reduce((s,r)=>s+r.a,0); document.getElementById('todayAmt').textContent=inr(v); }
   if(list){ drawLedger(rows); const L=document.getElementById('ledger'); if(lastDir){ L.style.setProperty('--dx',(lastDir*-40)+'px'); L.classList.remove('in'); void L.offsetWidth; L.classList.add('in'); } lastDir=0; } else drawChart(rows);
@@ -693,8 +735,7 @@ document.getElementById('prevBtn').onclick=()=>go(-1);
 document.getElementById('nextBtn').onclick=()=>go(1);
 document.getElementById('curBtn').onclick=()=>openDrawer();
 document.getElementById('pill').onclick=()=>setView(S.view==="list"?"chart":"list");
-document.getElementById('listL').onclick=()=>setView("list");
-document.getElementById('viewRing').onclick=()=>setView("chart");
+document.getElementById('segv').onclick=()=>setView(S.view==="list"?"chart":"list");
 document.getElementById('todayBtn').onclick=()=>{ S.mode="day"; store.set("mode","day"); S.anchor=today(); S.open.clear(); setView("list"); };
 document.addEventListener('keydown',e=>{ if(e.target.closest('input,.drawer,.sheet'))return; if(e.key==="ArrowLeft")go(-1); if(e.key==="ArrowRight")go(1); });
 (()=>{ let x0=null,y0=0; const zone=document.querySelector('main');
@@ -722,10 +763,20 @@ const fromISO=v=>{const [y,m,d]=v.split('-').map(Number);return new Date(y,m-1,d
 document.getElementById('ivFrom').onchange=e=>{ if(e.target.value){S.from=fromISO(e.target.value); if(S.to&&S.to<S.from)S.to=S.from; render();} };
 document.getElementById('ivTo').onchange=e=>{ if(e.target.value){S.to=fromISO(e.target.value); if(S.from&&S.from>S.to)S.from=S.to; render();} };
 document.getElementById('pickDate').onchange=e=>{ if(!e.target.value)return; S.mode="day"; store.set("mode","day"); S.anchor=fromISO(e.target.value); buildDrawer(); render(); closeDrawer(); };
-function openDrawer(){ buildDrawer(); scrim.hidden=false; drawer.hidden=false; drawer.querySelector('button').focus(); }
-function closeDrawer(){ scrim.hidden=true; drawer.hidden=true; }
-document.getElementById('menuBtn').onclick=openDrawer; scrim.onclick=closeDrawer;
-document.addEventListener('keydown',e=>{ if(e.key==="Escape"){ closeDrawer(); closeSearch(); } });
+/* Back gesture / button closes whatever is on top, like a native app */
+const OV=[]; let ovIgnore=0, ovReuse=false;
+function ovOpen(f){ OV.push(f); if(ovReuse) ovReuse=false; else history.pushState({ov:Date.now()},''); }
+function ovCloseTo(i){ const n=OV.length-i; if(n<=0) return; const fs=OV.splice(i); fs.reverse().forEach(f=>f()); ovIgnore++; history.go(-n); }
+function ovClose(f){ const i=OV.lastIndexOf(f); if(i<0){ f(); return; } ovCloseTo(i); }
+function ovBack(){ if(OV.length) ovCloseTo(OV.length-1); }
+addEventListener('popstate',()=>{ if(ovIgnore){ ovIgnore--; return; } const f=OV.pop(); if(f) f(); });
+const hideDrawer=()=>{ scrim.hidden=true; drawer.hidden=true; };
+function openDrawer(){ buildDrawer(); scrim.hidden=false; drawer.hidden=false; ovOpen(hideDrawer); }
+function closeDrawer(){ ovClose(hideDrawer); }
+document.getElementById('menuBtn').onclick=openDrawer; scrim.onclick=closeDrawer; document.getElementById('drawerDone').onclick=closeDrawer;
+(()=>{ let x0=null; drawer.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;},{passive:true});
+  drawer.addEventListener('touchend',e=>{ if(x0!=null&&e.changedTouches[0].clientX-x0<-60) closeDrawer(); x0=null; },{passive:true}); })();
+document.addEventListener('keydown',e=>{ if(e.key==="Escape") ovBack(); });
 
 /* ---------- search ---------- */
 const sheet=document.getElementById('sheet'), q=document.getElementById('q'), res=document.getElementById('res');
@@ -733,33 +784,52 @@ function doSearch(){ const t=q.value.trim().toLowerCase();
   const rows=filtered(false).filter(r=>!t||r.n.toLowerCase().includes(t)||r.c.toLowerCase().includes(t)||(r.s||"").toLowerCase().includes(t)).sort(byRecent);
   const shown=rows.slice(0,300);
   res.innerHTML=`<div class="sum num">${rows.length.toLocaleString('en-IN')} matches · ${inr(rows.reduce((s,r)=>s+r.a,0))} · all dates${rows.length>300?" · showing latest 300":""}</div>`+(shown.map(r=>txHTML(r,true)).join("")||`<div class="empty">No entries match “${esc(q.value)}”.</div>`); }
-document.getElementById('searchBtn').onclick=()=>{ sheet.hidden=false; doSearch(); q.focus(); };
-function closeSearch(){ sheet.hidden=true; }
+const hideSearch=()=>{ sheet.hidden=true; };
+document.getElementById('searchBtn').onclick=()=>{ sheet.hidden=false; ovOpen(hideSearch); doSearch(); q.focus(); };
+function closeSearch(){ ovClose(hideSearch); }
 document.getElementById('closeSearch').onclick=closeSearch; q.oninput=doSearch;
 
 /* ---------- live data from the sheet (Apps Script) ---------- */
 const syncEl=document.getElementById('sync'), syncTxt=document.getElementById('syncTxt'), syncBtn=document.getElementById('syncBtn');
 const fmtWhen=ms=>{const d=new Date(ms); return `${d.getDate()} ${MON[d.getMonth()]}, ${d.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'})}`;};
 function setSync(kind,txt){ syncEl.className="sync "+kind; syncTxt.textContent=txt; }
-let USER="", loading=false, CACHE_AT=0;
-{ const c=store.get("cache",null); if(c&&c.rows&&c.rows.length){ ROWS=toRows(c.rows); LOADING=false; CACHE_AT=c.at||0; } }
+let USER="", loading=false, CACHE_AT=0, SERVER=[], OUT=store.get("outbox",[]), flushing=false;
+const saveOut=()=>store.set("outbox",OUT);
+const asRow=p=>({d:new Date(p.date+"T00:00:00"),iso:p.date,a:+p.amount,p:p.paidBy||"",c:p.category,nw:p.needWant||"",n:p.note||"",f:p.expenseFor||"",s:p.category==="House"?(p.houseSub||""):"",pending:1});
+function withPending(rows){ let out=rows;
+  for(const it of OUT){ if(it.kind==="add") out=out.concat([{...asRow(it.p),ts:"",rn:0,em:""}]);
+    else out=out.map(r=>r.rn===it.p.row?{...r,...asRow(it.p)}:r); }
+  return out; }
+function liveLine(){ return `Live · ${SERVER.length.toLocaleString('en-IN')} entries · synced ${fmtWhen(CACHE_AT)}`+(OUT.length?` · ${OUT.length} waiting to sync`:""); }
+{ const c=store.get("cache",null); if(c&&c.rows&&c.rows.length){ SERVER=toRows(c.rows); LOADING=false; CACHE_AT=c.at||0; } ROWS=withPending(SERVER); }
+function showToast(t,ms){ toast.textContent=t; toast.hidden=false; clearTimeout(showToast.t); showToast.t=setTimeout(()=>toast.hidden=true,ms||2600); }
+function flush(){ if(flushing||!OUT.length||!PW()) return; flushing=true; const it=OUT[0];
+  google.script.run.withSuccessHandler(d=>{ flushing=false; OUT.shift(); saveOut(); applyData(d); flush(); })
+    .withFailureHandler(x=>{ flushing=false; const m=String(x&&x.message||x);
+      if(x&&x.net){ setSync("warn",`Offline · ${OUT.length} waiting to sync · they'll go when you're back online`); return; }
+      if(/PASSCODE|Locked/.test(m)){ setSync("warn",errText(x)); return; }
+      OUT.shift(); saveOut(); ROWS=withPending(SERVER); render();
+      showToast(`Not saved: ${inr(it.p.amount)} · ${it.p.category} — ${m}`,7000); setSync("warn",`One change wasn't saved: ${m}`); flush(); })
+    [it.kind==="add"?"addExpense":"updateExpense"](it.p,PW()); }
+addEventListener('online',()=>{ flush(); pull(); });
 function applyData(d){
-  LOADING=false; ROWS=toRows(d.rows||[]); USER=(d.user||"").toLowerCase();
+  LOADING=false; SERVER=toRows(d.rows||[]); ROWS=withPending(SERVER); USER=(d.user||"").toLowerCase();
   store.set("cache",{rows:d.rows||[],at:Date.now()});
   render(); if(!drawer.hidden) buildDrawer(); if(!sheet.hidden) doSearch();
-  CACHE_AT=Date.now(); setSync("live",`Live · ${ROWS.length.toLocaleString('en-IN')} entries · synced ${fmtWhen(Date.now())}`);
+  CACHE_AT=Date.now(); setSync(OUT.length?"warn":"live",liveLine());
 }
 const gate=document.getElementById('gate'), gIn=document.getElementById('gIn'), gErr=document.getElementById('gErr');
 const PW=()=>store.get("pass","");
 function askPass(msg){ gErr.textContent=msg||""; gate.hidden=false; setTimeout(()=>gIn.focus(),50); }
 document.getElementById('gForm').addEventListener('submit',e=>{ e.preventDefault(); const v=gIn.value.trim(); if(!v) return; store.set("pass",v); gate.hidden=true; gIn.value=""; pull(); });
 function errText(e){ const m=String(e&&e.message||e||"");
-  if(/PASSCODE/.test(m)){ store.set("pass",""); askPass("Wrong passcode. Ask Aditya."); return "Passcode needed."; }
+  if(/PASSCODE/.test(m)){ store.set("pass",""); askPass("Wrong passcode. 3 wrong tries lock the app for 3 hours."); return "Passcode needed."; }
+  if(/Locked/.test(m)){ if(!gate.hidden) gErr.textContent=m; return m; }
   if(/permission|access|not have|denied|authoriz/i.test(m)) return "This Google account can't open the expense sheet. Ask Aditya to share it with you.";
   return m || "Couldn't reach Google just now. Tap Sync to try again."; }
-function pull(){ if(loading) return; if(!PW()){ askPass(); return; } loading=true; syncBtn.classList.add('spin'); if(!ROWS.length) setSync("","Loading your sheet…"); else setSync("",`Showing saved copy from ${fmtWhen(CACHE_AT)} · updating…`);
+function pull(){ if(loading) return; if(!PW()){ askPass(); return; } flush(); loading=true; syncBtn.classList.add('spin'); if(!ROWS.length) setSync("","Loading your sheet…"); else setSync("",`Showing saved copy from ${fmtWhen(CACHE_AT)} · updating…`);
   google.script.run.withSuccessHandler(d=>{loading=false; syncBtn.classList.remove('spin'); applyData(d);})
-    .withFailureHandler(e=>{loading=false; syncBtn.classList.remove('spin'); LOADING=false; render(); const m=errText(e); if(ROWS.length&&!/PASSCODE/.test(String(e&&e.message||e))) setSync("warn",`Offline copy · last synced ${fmtWhen(CACHE_AT)} · tap Sync`); else setSync("warn",m);}).getData(PW()); }
+    .withFailureHandler(e=>{loading=false; syncBtn.classList.remove('spin'); LOADING=false; render(); const m=errText(e); if(ROWS.length&&e&&e.net) setSync("warn",`Offline copy · last synced ${fmtWhen(CACHE_AT)}`+(OUT.length?` · ${OUT.length} waiting to sync`:"")); else setSync("warn",m);}).getData(PW()); }
 syncBtn.onclick=pull;
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==="visible") pull(); });
 
@@ -792,11 +862,11 @@ function chips(id,opts,k){ const el=document.getElementById(id); el.innerHTML=op
   el.querySelectorAll('button').forEach((b,i)=>b.onclick=()=>{A[k]=opts[i]; chips(id,opts,k);}); }
 function catOrder(){ const m=new Map(); ROWS.forEach(r=>m.set(r.c,(m.get(r.c)||0)+1)); Object.keys(CATS).filter(c=>c!=="Others").forEach(c=>{if(!m.has(c))m.set(c,0);});
   return [...m.keys()].sort((a,b)=>a.localeCompare(b)); }
-function setStep(s){ A.step=s; document.getElementById('aPad').hidden=s!=="pad"; document.getElementById('aCats').hidden=s!=="cats"; document.getElementById('aSub').hidden=s!=="sub";
+function setStep(s){ A.step=s; document.getElementById('catHint').hidden=s==="pad"; document.getElementById('catHint').textContent=A.edit?"Tap a category to save your changes":"Tap a category to save"; document.getElementById('aPad').hidden=s!=="pad"; document.getElementById('aCats').hidden=s!=="cats"; document.getElementById('aSub').hidden=s!=="sub";
   if(s==="cats"){ const g=document.getElementById('aCats');
     g.innerHTML=catOrder().map(c=>{const col=catMeta(c)[1]; return `<button type="button" class="card" data-c="${esc(c)}" style="--cc:${col}"${A.edit&&A.edit.c===c?' data-sel="1"':''}>${icon(c,col)}<span>${esc(c)}</span></button>`;}).join("");
     g.querySelectorAll('[data-sel]').forEach(b=>b.classList.add('sel'));
-    g.querySelectorAll('.card').forEach(b=>b.onclick=()=>{ if(b.dataset.c==="House") setStep("sub"); else save(b.dataset.c,"",b); });
+    g.querySelectorAll('.card').forEach(b=>b.onclick=()=>{ if(b.dataset.c==="House"){ setStep("sub"); ovOpen(toCats); } else save(b.dataset.c,"",b); });
     g.scrollTop=0; } }
 document.querySelectorAll('#aSub .card').forEach(b=>b.onclick=()=>save("House",b.dataset.s,b));
 function openAdd(){
@@ -804,7 +874,7 @@ function openAdd(){
   aDate.value=isoDay(today()); document.getElementById('aDateTxt').textContent=dateLabel();
   document.getElementById('aNote').value=""; aErr.textContent=""; document.getElementById('aWho').textContent=A.paid;
   chips('aNw',["Need","Want"],"nw"); chips('aFor',["Shared","Aditya","Choti","Other"],"forW");
-  showVal(); setStep("pad"); add.hidden=false;
+  showVal(); setStep("pad"); add.hidden=false; ovOpen(hideAdd);
 }
 function openEdit(r){
   openAdd(); A.edit=r; document.getElementById('addTitle').textContent="Edit expense";
@@ -812,38 +882,49 @@ function openEdit(r){
   aDate.value=r.iso; document.getElementById('aDateTxt').textContent=dateLabel(); document.getElementById('aNote').value=r.n||"";
   document.getElementById('aWho').textContent=A.paid; chips('aNw',["Need","Want"],"nw"); chips('aFor',["Shared","Aditya","Choti","Other"],"forW"); showVal();
 }
-function closeAdd(){ if(A.saving) return; add.hidden=true; }
+const hideAdd=()=>{ add.hidden=true; };
+function closeAdd(){ ovClose(hideAdd); }
+const toPad=()=>setStep("pad"), toCats=()=>setStep("cats");
 document.getElementById('addBtn').onclick=openAdd;
-document.getElementById('closeAdd').onclick=()=>{ if(A.step!=="pad") setStep(A.step==="sub"?"cats":"pad"); else closeAdd(); };
+document.getElementById('closeAdd').onclick=ovBack;
 aDate.onchange=()=>{ if(!aDate.value) aDate.value=isoDay(today()); document.getElementById('aDateTxt').textContent=dateLabel(); };
 document.getElementById('aWhoBtn').onclick=()=>{ A.paid=A.paid==="Aditya"?"Choti":"Aditya"; document.getElementById('aWho').textContent=A.paid; store.set("lastPaid",A.paid); };
 document.getElementById('aBack').onclick=()=>{ A.expr=A.expr.slice(0,-1); showVal(); };
 document.querySelectorAll('#aPad [data-k]').forEach(b=>b.onclick=()=>key(b.dataset.k));
-document.getElementById('aChoose').onclick=()=>{ const v=evalExpr(A.expr); if(!(v>0)){ aErr.textContent="Enter the amount first."; return; } A.expr=String(v); showVal(); aErr.textContent=""; setStep("cats"); };
+document.getElementById('aChoose').onclick=()=>{ const v=evalExpr(A.expr); if(!(v>0)){ aErr.textContent="Enter the amount first."; return; } A.expr=String(v); showVal(); aErr.textContent=""; setStep("cats"); ovOpen(toPad); };
 add.addEventListener('keydown',e=>{ if(e.target.id==="aNote"||add.hidden) return;
   const m={"*":"×","/":"÷","Enter":"="}; const k=m[e.key]||e.key; if(/^[\d.+\-×÷=]$/.test(k)){ e.preventDefault(); key(k);} else if(e.key==="Backspace"){ e.preventDefault(); A.expr=A.expr.slice(0,-1); showVal(); } });
 function save(cat,sub,btn){
-  if(A.saving) return; const amt=evalExpr(A.expr); if(!(amt>0)){ setStep("pad"); aErr.textContent="Enter the amount first."; return; }
-  A.saving=true; btn.classList.add('busy'); aErr.textContent=""; const ed=A.edit;
+  if(A.saving) return; const amt=evalExpr(A.expr); if(!(amt>0)){ ovBack(); aErr.textContent="Enter the amount first."; return; }
+  A.saving=true; aErr.textContent=""; const ed=A.edit;
   const payload={amount:amt,category:cat,houseSub:sub,paidBy:A.paid,needWant:A.nw,expenseFor:A.forW,date:aDate.value,note:document.getElementById('aNote').value.trim()};
   payload.rid=A.rid;
   if(ed){ payload.row=ed.rn; payload.ts=ed.ts; payload.oldAmt=ed.a; }
-  google.script.run.withSuccessHandler(d=>{ A.saving=false; btn.classList.remove('busy'); add.hidden=true; applyData(d);
-      toast.textContent=`${ed?"Updated":"Saved"} ${inr(amt)} · ${cat}${sub?" ("+sub.replace("House - ","")+")":""}`; toast.hidden=false; setTimeout(()=>toast.hidden=true,2600); })
-    .withFailureHandler(x=>{ A.saving=false; btn.classList.remove('busy'); aErr.textContent=errText(x)+" Tap Sync to check whether it was saved before trying again."; })
-    [ed?"updateExpense":"addExpense"](payload,PW());
+  // Saved on the phone at once; sent to the sheet in the background (kept and retried if offline).
+  OUT.push({kind:ed?"edit":"add",p:payload,at:Date.now()}); saveOut();
+  ROWS=withPending(SERVER); closeAdd(); render(); if(!sheet.hidden) doSearch();
+  showToast(`${ed?"Updated":"Saved"} ${inr(amt)} · ${cat}${sub?" ("+sub.replace("House - ","")+")":""}`); flush();
 }
-document.addEventListener('keydown',e=>{ if(e.key==="Escape") closeAdd(); });
 
 /* ---------- tap an entry → edit ---------- */
 const eSheet=document.getElementById('eSheet'); let eRow=null;
-function openEntry(rn){ const r=ROWS.find(x=>x.rn===rn); if(!r) return; eRow=r;
-  document.getElementById('eT').textContent=`${r.n||r.c} · ${inr(r.a)}`;
-  document.getElementById('eS').textContent=`${r.c}${r.s?" ("+r.s.replace("House - ","")+")":""} · ${fmtDate(r)} · Paid by ${r.p||"—"}`;
-  eSheet.hidden=false; }
+const hideE=()=>{ eSheet.hidden=true; };
+const whoAdded=r=>/jayswal|spardha/i.test(r.em)?"Choti":/akashaditya/i.test(r.em)?"Aditya":r.em?r.em:"";
+function fmtStamp(ts){ const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(ts||""); if(!m) return ""; const d=new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5]);
+  return `${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}, ${d.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'})}`; }
+function openEntry(rn){ const r=ROWS.find(x=>x.rn===rn); if(!r) return; eRow=r; const col=catMeta(r.c)[1];
+  document.getElementById('eAmt').textContent=inr(r.a);
+  document.getElementById('eT').textContent=r.n||r.c;
+  const full=`${["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][r.d.getDay()]}, ${r.d.getDate()} ${MONL[r.d.getMonth()]} ${r.d.getFullYear()}`;
+  const added=[fmtStamp(r.ts), whoAdded(r)?("by "+whoAdded(r)):(r.ts?"in the app":"")].filter(Boolean).join(" · ");
+  const rowsH=[["Category",`<span class="ecat" style="--cc:${col}">${icon(r.c,col)}${esc(r.c)}${r.s?` · ${esc(r.s.replace("House - ",""))}`:""}</span>`],
+    ["Date",esc(full)],["Paid by",esc(r.p||"—")],["Need or want",esc(r.nw||"—")],["For",esc(r.f||"Not set")],["Added",esc(added||"—")],["Sheet row",r.rn?String(r.rn):"Syncing…"]];
+  document.getElementById('eList').innerHTML=rowsH.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("");
+  document.getElementById('eS').textContent="Tip: swipe left on any entry to edit it quickly.";
+  eSheet.hidden=false; ovOpen(hideE); }
 let swipedAt=0;
 document.addEventListener('click',e=>{ if(Date.now()-swipedAt<400) return;
-  const a=e.target.closest('.txa'); if(a){ const w=a.closest('.txw'); w.classList.remove('open'); const r=ROWS.find(x=>x.rn===+w.dataset.rn); if(r){ if(!sheet.hidden) closeSearch(); openEdit(r);} return; }
+  const a=e.target.closest('.txa'); if(a){ const w=a.closest('.txw'); w.classList.remove('open'); const r=ROWS.find(x=>x.rn===+w.dataset.rn); if(r) openEdit(r); return; }
   const t=e.target.closest('.txw[data-rn]'); if(!t||e.target.closest('#addSheet,#eSheet')) return;
   if(t.classList.contains('open')){ t.classList.remove('open'); return; }
   if(+t.dataset.rn) openEntry(+t.dataset.rn); });
@@ -857,6 +938,19 @@ document.addEventListener('click',e=>{ if(Date.now()-swipedAt<400) return;
     const tx=w.querySelector('.tx'); tx.style.transition='none'; tx.style.transform=`translateX(${dx}px)`; },{passive:true});
   document.addEventListener('touchend',()=>{ if(!w) return; if(drag){ const tx=w.querySelector('.tx'); tx.style.transition=''; tx.style.transform=''; w.classList.toggle('open',dx<-W/2); swipedAt=Date.now(); } w=null; },{passive:true});
 })();
+/* updates: a banner when a new version is published */
+const APP_VERSION="1.4";
+document.getElementById('verTxt').textContent="Version "+APP_VERSION;
+async function checkUpdate(manual){ try{ const j=await (await fetch('version.json?t='+Date.now(),{cache:'no-store'})).json();
+    if(j.v&&j.v!==APP_VERSION){ document.getElementById('updTxt').textContent=j.note?`New version: ${j.note}`:"A new version is ready"; document.getElementById('upd').hidden=false; }
+    else if(manual) showToast("You're on the latest version"); }
+  catch(e){ if(manual) showToast("Couldn't check — you seem to be offline"); } }
+async function doUpdate(){ document.getElementById('updBtn').textContent="Updating…";
+  try{ const reg=await navigator.serviceWorker?.getRegistration(); if(reg) await reg.update(); const ks=await caches.keys(); await Promise.all(ks.map(k=>caches.delete(k))); }catch(e){}
+  location.reload(); }
+document.getElementById('updBtn').onclick=doUpdate;
+document.getElementById('verBtn').onclick=()=>checkUpdate(true);
+setTimeout(checkUpdate,2500); document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==="visible") checkUpdate(); });
 /* pull down at the top to sync */
 (()=>{ const ptr=document.getElementById('ptr'); let y0=null,dy=0;
   addEventListener('touchstart',e=>{ y0=(scrollY<=0&&!e.target.closest('.add,.sheet,.drawer,.esheet,.gate,.txw'))?e.touches[0].clientY:null; dy=0; },{passive:true});
@@ -864,9 +958,9 @@ document.addEventListener('click',e=>{ if(Date.now()-swipedAt<400) return;
   addEventListener('touchend',()=>{ if(y0==null) return; if(dy>90) pull(); y0=null; dy=0; ptr.style.setProperty('--p',0); },{passive:true});
 })();
 addEventListener('scroll',()=>document.body.classList.toggle('scrolled',scrollY>8),{passive:true});
-document.getElementById('eClose').onclick=()=>{eSheet.hidden=true;};
-eSheet.addEventListener('click',e=>{ if(e.target===eSheet) eSheet.hidden=true; });
-document.getElementById('eEdit').onclick=()=>{ eSheet.hidden=true; if(!sheet.hidden) closeSearch(); openEdit(eRow); };
+document.getElementById('eClose').onclick=()=>ovClose(hideE);
+eSheet.addEventListener('click',e=>{ if(e.target===eSheet) ovClose(hideE); });
+document.getElementById('eEdit').onclick=()=>{ if(OV[OV.length-1]===hideE){ OV.pop(); ovReuse=true; } hideE(); openEdit(eRow); };
 
 render(); pull();
 })();
