@@ -399,6 +399,11 @@ html.skinning *{transition:background-color .4s ease,color .4s ease,border-color
 /* app-like: no text selection / copy menu on long-press, except where you type */
 html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+/* long-press to delete */
+.txw.lp .tx{background:color-mix(in srgb,var(--spend) 12%,var(--surface));transition:background .4s}
+.esheet .del{color:var(--spend)}
+.esheet .go.red{background:var(--spend);color:#fff}
+.whob{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 /* moving category tiles */
 .cgrid .card{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;position:relative}
 .cgrid.sorting .card{animation:none}
@@ -469,6 +474,7 @@ input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:d
   <div><label class="k">Expense for</label><div class="seg" id="fFor"></div></div>
   <div><label class="k">Expense type</label><div class="seg" id="fNw"></div></div>
   <div><label class="k">Period</label><div class="periods" id="fPeriod"></div></div>
+  <div class="ver"><button type="button" id="meBtn"></button></div>
   <div class="ver"><span id="verTxt"></span><button type="button" id="verBtn">Check for updates</button></div>
   <div id="intervalBox" hidden><label class="k">Interval</label><div class="dates"><input type="date" id="ivFrom" aria-label="From"><input type="date" id="ivTo" aria-label="To"></div></div>
   <div><label class="k">Theme</label><div class="skins" id="fSkin"></div></div>
@@ -486,7 +492,9 @@ input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:d
 <div class="gate" id="gate" hidden><form id="gForm"><img class="logo" src="icon-192.png" alt=""><h2>Adi &amp; Choti Kharcha</h2><p>Enter the family passcode (once on this phone).</p>
 <input id="gIn" type="password" autocomplete="off" aria-label="Passcode"><button type="submit">Open</button><div class="err" id="gErr" role="alert"></div></form></div>
 <div class="esheet" id="eSheet" hidden><div class="box"><div class="eamt num" id="eAmt"></div><div class="t" id="eT"></div><dl class="elist" id="eList"></dl><div class="s" id="eS"></div>
-<button class="go" id="eEdit" type="button">Edit this expense</button><button class="x" id="eClose" type="button">Close</button></div></div>
+<button class="go" id="eEdit" type="button">Edit this expense</button><button class="x del" id="eDel" type="button">Delete this expense</button><button class="x" id="eClose" type="button">Close</button></div></div>
+<div class="esheet" id="dSheet" hidden><div class="box"><div class="t">Delete this expense?</div><div class="eamt num" id="dAmt"></div><div class="s" id="dT"></div><div class="s">It is removed from the sheet for both of you. The nightly backup keeps the old copy for 30 days.</div><button class="go red" id="dGo" type="button">Delete</button><button class="x" id="dNo" type="button">Cancel</button></div></div>
+<div class="esheet" id="wSheet" hidden><div class="box"><div class="t">Who uses this phone?</div><div class="s">Entries you add here will show who added them.</div><div class="whob"><button class="go" type="button" data-w="Aditya">Aditya</button><button class="go" type="button" data-w="Choti">Choti</button></div></div></div>
 <div class="add" id="addSheet" hidden>
   <div class="hd">
     <button class="ib" id="closeAdd" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
@@ -535,6 +543,7 @@ window.google={script:{run:(function(){
       const fail=()=>{ const x=new Error("Couldn't reach Google just now. Check your internet."); x.net=true; bad&&bad(x); };
       if(name==="getData") fetch(API+"?action=get&pass="+encodeURIComponent(a[0]||"")).then(r=>r.json()).then(done,fail);
       else if(name==="updateExpense") fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"edit",e:a[0],pass:a[1]})}).then(r=>r.json()).then(done,fail);
+      else if(name==="deleteExpense") fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"del",e:a[0],pass:a[1]})}).then(r=>r.json()).then(done,fail);
       else if(name==="addExpense") fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"add",e:a[0],pass:a[1]})}).then(r=>r.json()).then(done,fail);
     };}});}
   return mk();})()}};
@@ -748,7 +757,7 @@ function drawLedger(rows){
       <svg class="chev" viewBox="0 0 14 14"><path d="M3 5l4 4 4-4"/></svg><span class="cic">${icon(g.c,col)}</span>
       <span class="cname"><span style="color:${col}">${esc(g.c)}</span><span class="badge num">${g.n}</span></span><span class="amt num">${inr(g.sum)}</span></button>
       ${open?`<div class="txs">${g.rows.sort(byRecent).map(r=>txHTML(r)).join("")}</div>`:''}</div>`; }
-  el.innerHTML=h+`<p class="hint">Tap an entry for details · swipe left on it to edit</p>`;
+  el.innerHTML=h+`<p class="hint">Tap an entry for details · swipe left to edit · long-press to delete</p>`;
   el.querySelectorAll('.cat>button').forEach(b=>b.addEventListener('click',()=>{const c=b.parentElement.dataset.c; S.open.has(c)?S.open.delete(c):S.open.add(c); drawLedger(filtered());}));
 }
 function openCat(c){
@@ -858,19 +867,22 @@ const saveOut=()=>store.set("outbox",OUT);
 const asRow=p=>({d:new Date(p.date+"T00:00:00"),iso:p.date,a:+p.amount,p:p.paidBy||"",c:p.category,nw:p.needWant||"",n:p.note||"",f:p.expenseFor||"",s:p.category==="House"?(p.houseSub||""):"",pending:1});
 function withPending(rows){ let out=rows;
   for(const it of OUT){ if(it.kind==="add") out=out.concat([{...asRow(it.p),ts:"",rn:0,em:""}]);
+    else if(it.kind==="del") out=out.filter(r=>r.rn!==it.p.row);
     else out=out.map(r=>r.rn===it.p.row?{...r,...asRow(it.p)}:r); }
   return out; }
 function liveLine(){ return `Live · ${SERVER.length.toLocaleString('en-IN')} entries · synced ${fmtWhen(CACHE_AT)}`+(OUT.length?` · ${OUT.length} waiting to sync`:""); }
 { const c=store.get("cache",null); if(c&&c.rows&&c.rows.length){ SERVER=toRows(c.rows); LOADING=false; CACHE_AT=c.at||0; } ROWS=withPending(SERVER); }
 function showToast(t,ms){ toast.textContent=t; toast.hidden=false; clearTimeout(showToast.t); showToast.t=setTimeout(()=>toast.hidden=true,ms||2600); }
 function flush(){ if(flushing||!OUT.length||!PW()) return; flushing=true; const it=OUT[0];
-  google.script.run.withSuccessHandler(d=>{ flushing=false; OUT.shift(); saveOut(); applyData(d); flush(); })
+  google.script.run.withSuccessHandler(d=>{ flushing=false; OUT.shift();
+    if(it.kind==="del") OUT.forEach(o=>{ if(o.kind!=="add"&&o.p.row>it.p.row) o.p.row--; }); // rows below move up one
+    saveOut(); applyData(d); flush(); })
     .withFailureHandler(x=>{ flushing=false; const m=String(x&&x.message||x);
       if(x&&x.net){ setSync("warn",`Offline · ${OUT.length} waiting to sync · they'll go when you're back online`); return; }
       if(/PASSCODE|Locked/.test(m)){ setSync("warn",errText(x)); return; }
       OUT.shift(); saveOut(); ROWS=withPending(SERVER); render();
-      showToast(`Not saved: ${inr(it.p.amount)} · ${it.p.category} — ${m}`,7000); setSync("warn",`One change wasn't saved: ${m}`); flush(); })
-    [it.kind==="add"?"addExpense":"updateExpense"](it.p,PW()); }
+      showToast(`${it.kind==="del"?"Not deleted":"Not saved"}: ${inr(it.p.amount)} · ${it.p.category} — ${m}`,7000); setSync("warn",`One change wasn't saved: ${m}`); flush(); })
+    [{add:"addExpense",edit:"updateExpense",del:"deleteExpense"}[it.kind]](it.p,PW()); }
 addEventListener('online',()=>{ flush(); pull(); });
 function applyData(d){
   LOADING=false; SERVER=toRows(d.rows||[]); ROWS=withPending(SERVER); USER=(d.user||"").toLowerCase();
@@ -880,8 +892,9 @@ function applyData(d){
 }
 const gate=document.getElementById('gate'), gIn=document.getElementById('gIn'), gErr=document.getElementById('gErr');
 const PW=()=>store.get("pass","");
+const ME=()=>store.get("me","");
 function askPass(msg){ gErr.textContent=msg||""; gate.hidden=false; setTimeout(()=>gIn.focus(),50); }
-document.getElementById('gForm').addEventListener('submit',e=>{ e.preventDefault(); const v=gIn.value.trim(); if(!v) return; store.set("pass",v); gate.hidden=true; gIn.value=""; pull(); });
+document.getElementById('gForm').addEventListener('submit',e=>{ e.preventDefault(); const v=gIn.value.trim(); if(!v) return; store.set("pass",v); gate.hidden=true; gIn.value=""; pull(); if(!ME()) askWho(); });
 function errText(e){ const m=String(e&&e.message||e||"");
   if(/PASSCODE/.test(m)){ store.set("pass",""); askPass("Wrong passcode. 3 wrong tries lock the app for 3 hours."); return "Passcode needed."; }
   if(/Locked/.test(m)){ if(!gate.hidden) gErr.textContent=m; return m; }
@@ -1003,7 +1016,7 @@ function save(cat,sub,btn){
   if(A.saving) return; const amt=evalExpr(A.expr); if(!(amt>0)){ ovBack(); aErr.textContent="Enter the amount first."; return; }
   A.saving=true; aErr.textContent=""; const ed=A.edit;
   const payload={amount:amt,category:cat,houseSub:sub,paidBy:A.paid,needWant:A.nw,expenseFor:A.forW,date:aDate.value,note:document.getElementById('aNote').value.trim()};
-  payload.rid=A.rid;
+  payload.rid=A.rid; payload.addedBy=ME();
   if(ed){ payload.row=ed.rn; payload.ts=ed.ts; payload.oldAmt=ed.a; }
   // Saved on the phone at once; sent to the sheet in the background (kept and retried if offline).
   OUT.push({kind:ed?"edit":"add",p:payload,at:Date.now()}); saveOut();
@@ -1014,7 +1027,7 @@ function save(cat,sub,btn){
 /* ---------- tap an entry → edit ---------- */
 const eSheet=document.getElementById('eSheet'); let eRow=null;
 const hideE=()=>{ eSheet.hidden=true; };
-const whoAdded=r=>/jayswal|spardha/i.test(r.em)?"Choti":/akashaditya/i.test(r.em)?"Aditya":r.em?r.em:"";
+const whoAdded=r=>/jayswal|spardha|choti/i.test(r.em)?"Choti":/akashaditya|aditya/i.test(r.em)?"Aditya":r.em?r.em:"";
 function fmtStamp(ts){ const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(ts||""); if(!m) return ""; const d=new Date(+m[1],+m[2]-1,+m[3],+m[4],+m[5]);
   return `${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}, ${d.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'})}`; }
 function openEntry(rn){ const r=ROWS.find(x=>x.rn===rn); if(!r) return; eRow=r; const col=catMeta(r.c)[1];
@@ -1025,26 +1038,53 @@ function openEntry(rn){ const r=ROWS.find(x=>x.rn===rn); if(!r) return; eRow=r; 
   const rowsH=[["Category",`<span class="ecat" style="--cc:${col}">${icon(r.c,col)}${esc(r.c)}${r.s?` · ${esc(r.s.replace("House - ",""))}`:""}</span>`],
     ["Date",esc(full)],["Paid by",esc(r.p||"—")],["Expense type",esc(r.nw||"—")],["Expense for",esc(r.f||"Not set")],["Added",esc(added||"—")],["Sheet row",r.rn?String(r.rn):"Syncing…"]];
   document.getElementById('eList').innerHTML=rowsH.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("");
-  document.getElementById('eS').textContent="Tip: swipe left on any entry to edit it quickly.";
+  document.getElementById('eS').textContent="Tip: swipe left on an entry to edit it, long-press to delete it.";
   eSheet.hidden=false; ovOpen(hideE); }
 let swipedAt=0;
+/* delete: long-press an entry (or Delete in its details) → confirm */
+const dSheet=document.getElementById('dSheet'); let dRow=null;
+const hideD=()=>{ dSheet.hidden=true; };
+function askDelete(rn){ if(!dSheet.hidden) return; const r=ROWS.find(x=>x.rn===rn&&rn);
+  if(!r){ showToast("This entry is still syncing — try again in a moment."); return; }
+  dRow=r; document.getElementById('dAmt').textContent=inr(r.a);
+  document.getElementById('dT').textContent=[r.n||r.c, fmtDate(r), "Paid by "+(r.p||"—")].join(" · ");
+  dSheet.hidden=false; ovOpen(hideD); }
+document.getElementById('dNo').onclick=()=>ovClose(hideD);
+dSheet.addEventListener('click',e=>{ if(e.target===dSheet) ovClose(hideD); });
+document.getElementById('dGo').onclick=()=>{ const r=dRow; if(!r) return; ovClose(hideD); dRow=null;
+  OUT.push({kind:"del",p:{row:r.rn,ts:r.ts,oldAmt:r.a,amount:r.a,category:r.c},at:Date.now()}); saveOut();
+  ROWS=withPending(SERVER); render(); if(!sheet.hidden) doSearch();
+  showToast(`Deleted ${inr(r.a)} · ${r.c}`); flush(); };
+document.addEventListener('contextmenu',e=>{ const t=e.target.closest&&e.target.closest('.txw[data-rn]'); if(t&&!e.target.closest('#addSheet,#eSheet')){ e.preventDefault(); askDelete(+t.dataset.rn); } });
+/* who uses this phone (shown as "Added … by …" on new entries) */
+const wSheet=document.getElementById('wSheet'), meBtn=document.getElementById('meBtn');
+function showMe(){ meBtn.textContent=ME()?`This phone: ${ME()} · change`:"Set who uses this phone"; }
+function askWho(){ wSheet.hidden=false; }
+wSheet.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{ store.set("me",b.dataset.w); wSheet.hidden=true; showMe(); showToast(`This phone: ${b.dataset.w}`); });
+meBtn.onclick=askWho; showMe();
 document.addEventListener('click',e=>{ if(Date.now()-swipedAt<400) return;
   const a=e.target.closest('.txa'); if(a){ const w=a.closest('.txw'); w.classList.remove('open'); const r=ROWS.find(x=>x.rn===+w.dataset.rn); if(r) openEdit(r); return; }
   const t=e.target.closest('.txw[data-rn]'); if(!t||e.target.closest('#addSheet,#eSheet')) return;
   if(t.classList.contains('open')){ t.classList.remove('open'); return; }
   if(+t.dataset.rn) openEntry(+t.dataset.rn); });
 /* swipe an entry left to reveal Edit */
-(()=>{ let w=null,x0=0,y0=0,dx=0,drag=false; const W=84;
+(()=>{ let w=null,x0=0,y0=0,dx=0,drag=false,lpT=null,lpDone=false; const W=84;
+  const lpStop=()=>{ clearTimeout(lpT); lpT=null; document.querySelectorAll('.txw.lp').forEach(o=>o.classList.remove('lp')); };
   const closeOthers=t=>document.querySelectorAll('.txw.open').forEach(o=>{ if(o!==t) o.classList.remove('open'); });
-  document.addEventListener('touchstart',e=>{ const t=e.target.closest('.txw'); closeOthers(t); w=t; drag=false; dx=0; if(t){ x0=e.touches[0].clientX; y0=e.touches[0].clientY; } },{passive:true});
+  document.addEventListener('touchstart',e=>{ const t=e.target.closest('.txw'); closeOthers(t); w=t; drag=false; dx=0; lpDone=false; lpStop();
+    if(t){ x0=e.touches[0].clientX; y0=e.touches[0].clientY;
+      if(e.touches.length===1&&!t.classList.contains('open')&&!e.target.closest('.txa')){ t.classList.add('lp');
+        lpT=setTimeout(()=>{ lpT=null; t.classList.remove('lp'); lpDone=true; w=null; try{navigator.vibrate&&navigator.vibrate(20);}catch(_){} askDelete(+t.dataset.rn); },550); } } },{passive:true});
   document.addEventListener('touchmove',e=>{ if(!w) return; const mx=e.touches[0].clientX-x0, my=e.touches[0].clientY-y0;
+    if(Math.abs(mx)>8||Math.abs(my)>8) lpStop();
     if(!drag){ if(Math.abs(mx)>10&&Math.abs(mx)>Math.abs(my)*1.3) drag=true; else { if(Math.abs(my)>10) w=null; return; } }
     const base=w.classList.contains('open')?-W:0; dx=Math.max(-W-24,Math.min(0,base+mx));
     const tx=w.querySelector('.tx'); tx.style.transition='none'; tx.style.transform=`translateX(${dx}px)`; },{passive:true});
-  document.addEventListener('touchend',()=>{ if(!w) return; if(drag){ const tx=w.querySelector('.tx'); tx.style.transition=''; tx.style.transform=''; w.classList.toggle('open',dx<-W/2); swipedAt=Date.now(); } w=null; },{passive:true});
+  document.addEventListener('touchcancel',lpStop,{passive:true});
+  document.addEventListener('touchend',()=>{ lpStop(); if(lpDone){ lpDone=false; swipedAt=Date.now(); return; } if(!w) return; if(drag){ const tx=w.querySelector('.tx'); tx.style.transition=''; tx.style.transform=''; w.classList.toggle('open',dx<-W/2); swipedAt=Date.now(); } w=null; },{passive:true});
 })();
 /* updates: a banner when a new version is published */
-const APP_VERSION="1.9";
+const APP_VERSION="2.0";
 document.getElementById('verTxt').textContent="Version "+APP_VERSION;
 async function checkUpdate(manual){ try{ const j=await (await fetch('version.json?t='+Date.now(),{cache:'no-store'})).json();
     if(j.v&&j.v!==APP_VERSION){ document.getElementById('updTxt').textContent=j.note?`New version: ${j.note}`:"A new version is ready"; document.getElementById('upd').hidden=false; }
@@ -1065,9 +1105,10 @@ setTimeout(checkUpdate,2500); document.addEventListener('visibilitychange',()=>{
 addEventListener('scroll',()=>document.body.classList.toggle('scrolled',scrollY>8),{passive:true});
 document.getElementById('eClose').onclick=()=>ovClose(hideE);
 eSheet.addEventListener('click',e=>{ if(e.target===eSheet) ovClose(hideE); });
+document.getElementById('eDel').onclick=()=>{ const r=eRow; if(OV[OV.length-1]===hideE){ OV.pop(); ovReuse=true; } hideE(); askDelete(r.rn); };
 document.getElementById('eEdit').onclick=()=>{ if(OV[OV.length-1]===hideE){ OV.pop(); ovReuse=true; } hideE(); openEdit(eRow); };
 
-render(); pull();
+render(); pull(); if(PW()&&!ME()) askWho();
 })();
 </script>
 
