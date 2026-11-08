@@ -324,6 +324,7 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
   bottom:calc(88px + env(safe-area-inset-bottom,0px));animation:toastin .45s var(--ease)}
 @keyframes toastin{from{opacity:0;transform:translate(-50%,12px) scale(.96)}to{opacity:1;transform:translate(-50%,0)}}
 .gate form{justify-items:stretch;text-align:center}
+.gate .gbtn{justify-self:center;min-height:44px}
 .gate .logo{width:72px;height:72px;border-radius:18px;justify-self:center;box-shadow:0 6px 20px rgba(0,0,0,.15)}
 .gate input{border:0;border-radius:12px;background:var(--surface);text-align:center}
 .gate button{background:var(--tint);color:var(--head-ink);border-radius:14px;padding:14px}
@@ -489,12 +490,10 @@ input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:d
   <div class="res" id="res"></div>
 </div>
 
-<div class="gate" id="gate" hidden><form id="gForm"><img class="logo" src="icon-192.png" alt=""><h2>Adi &amp; Choti Kharcha</h2><p>Enter the family passcode (once on this phone).</p>
-<input id="gIn" type="password" autocomplete="off" aria-label="Passcode"><button type="submit">Open</button><div class="err" id="gErr" role="alert"></div></form></div>
+<div class="gate" id="gate" hidden><form id="gForm" onsubmit="return false"><img class="logo" src="icon-192.png" alt=""><h2>Adi &amp; Choti Kharcha</h2><p>Sign in with your Google account. Only Aditya and Choti can get in.</p><div id="gBtn" class="gbtn"></div><div class="err" id="gErr" role="alert"></div></form></div>
 <div class="esheet" id="eSheet" hidden><div class="box"><div class="eamt num" id="eAmt"></div><div class="t" id="eT"></div><dl class="elist" id="eList"></dl><div class="s" id="eS"></div>
 <button class="go" id="eEdit" type="button">Edit this expense</button><button class="x del" id="eDel" type="button">Delete this expense</button><button class="x" id="eClose" type="button">Close</button></div></div>
 <div class="esheet" id="dSheet" hidden><div class="box"><div class="t">Delete this expense?</div><div class="eamt num" id="dAmt"></div><div class="s" id="dT"></div><div class="s">It is removed from the sheet for both of you. The nightly backup keeps the old copy for 30 days.</div><button class="go red" id="dGo" type="button">Delete</button><button class="x" id="dNo" type="button">Cancel</button></div></div>
-<div class="esheet" id="wSheet" hidden><div class="box"><div class="t">Who uses this phone?</div><div class="s">Entries you add here will show who added them.</div><div class="whob"><button class="go" type="button" data-w="Aditya">Aditya</button><button class="go" type="button" data-w="Choti">Choti</button></div></div></div>
 <div class="add" id="addSheet" hidden>
   <div class="hd">
     <button class="ib" id="closeAdd" aria-label="Back"><svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
@@ -541,12 +540,15 @@ window.google={script:{run:(function(){
     return (...a)=>{
       const done=r=>{ if(r&&r.ok) ok&&ok(r.d); else bad&&bad(new Error((r&&r.m)||"Couldn't reach the sheet.")); };
       const fail=()=>{ const x=new Error("Couldn't reach Google just now. Check your internet."); x.net=true; bad&&bad(x); };
-      if(name==="getData") fetch(API+"?action=get&pass="+encodeURIComponent(a[0]||"")).then(r=>r.json()).then(done,fail);
+      if(name==="getData") fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"get",pass:a[0]})}).then(r=>r.json()).then(done,fail);
+      else if(name==="login") fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"login",idToken:a[0]})}).then(r=>r.json()).then(done,fail);
+      else if(name==="logout") fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"logout",pass:a[0]})}).then(r=>r.json()).then(done,fail);
       else if(name==="updateExpense") fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"edit",e:a[0],pass:a[1]})}).then(r=>r.json()).then(done,fail);
       else if(name==="deleteExpense") fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"del",e:a[0],pass:a[1]})}).then(r=>r.json()).then(done,fail);
       else if(name==="addExpense") fetch(API,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify({action:"add",e:a[0],pass:a[1]})}).then(r=>r.json()).then(done,fail);
     };}});}
   return mk();})()}};
+window.KH_SCRIPT=window.google.script;
 if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 <script>
@@ -590,7 +592,7 @@ const icon=(c,col,sw)=>`<svg viewBox="0 0 24 24" style="stroke:${col}" ${sw?`str
 
 /* ---------- data ---------- */
 let ROWS=[];
-function toRows(arr){ return arr.map(r=>({d:new Date(r[0]+"T00:00:00"),iso:r[0],a:+r[1]||0,p:r[2]||"",c:r[3]||"Uncategorised",nw:r[4]||"",n:r[5]||"",f:r[6]||"",s:r[7]||"",ts:r[8]||"",rn:r[9]||0,em:r[10]||""})); }
+function toRows(arr){ return arr.map(r=>({d:new Date(r[0]+"T00:00:00"),iso:r[0],a:+r[1]||0,p:r[2]||"",c:r[3]||"Uncategorised",nw:r[4]||"",n:r[5]||"",f:r[6]||"",s:r[7]||"",ts:r[8]||"",rn:r[9]||0,em:r[10]||"",eb:r[11]||"",ea:r[12]||""})); }
 let LOADING=true;
 
 function parseCSV(t){ const out=[];let row=[],f="",q=false;
@@ -879,7 +881,7 @@ function flush(){ if(flushing||!OUT.length||!PW()) return; flushing=true; const 
     saveOut(); applyData(d); flush(); })
     .withFailureHandler(x=>{ flushing=false; const m=String(x&&x.message||x);
       if(x&&x.net){ setSync("warn",`Offline · ${OUT.length} waiting to sync · they'll go when you're back online`); return; }
-      if(/PASSCODE|Locked/.test(m)){ setSync("warn",errText(x)); return; }
+      if(/SIGNIN|PASSCODE|Locked/.test(m)){ setSync("warn",errText(x)); return; }
       OUT.shift(); saveOut(); ROWS=withPending(SERVER); render();
       showToast(`${it.kind==="del"?"Not deleted":"Not saved"}: ${inr(it.p.amount)} · ${it.p.category} — ${m}`,7000); setSync("warn",`One change wasn't saved: ${m}`); flush(); })
     [{add:"addExpense",edit:"updateExpense",del:"deleteExpense"}[it.kind]](it.p,PW()); }
@@ -891,12 +893,22 @@ function applyData(d){
   CACHE_AT=Date.now(); setSync(OUT.length?"warn":"live",liveLine());
 }
 const gate=document.getElementById('gate'), gIn=document.getElementById('gIn'), gErr=document.getElementById('gErr');
-const PW=()=>store.get("pass","");
+/* sign in with Google: the script checks the account and gives this phone its own session key */
+const CLIENT_ID="816088287548-9r600bocno2f00uf2p319cdg0f8bcov7.apps.googleusercontent.com";
+const PW=()=>store.get("tok","");
 const ME=()=>store.get("me","");
-function askPass(msg){ gErr.textContent=msg||""; gate.hidden=false; setTimeout(()=>gIn.focus(),50); }
-document.getElementById('gForm').addEventListener('submit',e=>{ e.preventDefault(); const v=gIn.value.trim(); if(!v) return; store.set("pass",v); gate.hidden=true; gIn.value=""; pull(); if(!ME()) askWho(); });
+let gsi=null;
+function loadGSI(){ return gsi||(gsi=new Promise((ok,bad)=>{ const s=document.createElement('script'); s.src="https://accounts.google.com/gsi/client"; s.async=true;
+  s.onload=()=>{ if(!window.google.script) window.google.script=window.KH_SCRIPT; ok(); }; s.onerror=()=>{ gsi=null; bad(); }; document.head.appendChild(s); })); }
+function askPass(msg){ gErr.textContent=msg||""; gate.hidden=false;
+  loadGSI().then(()=>{ google.accounts.id.initialize({client_id:CLIENT_ID,callback:onCred,ux_mode:"popup",auto_select:true,itp_support:true});
+    const b=document.getElementById('gBtn'); b.innerHTML=""; google.accounts.id.renderButton(b,{theme:"filled_blue",size:"large",shape:"pill",text:"signin_with",width:260}); })
+  .catch(()=>{ gErr.textContent="Couldn't load Google sign-in. Check your internet and reopen the app."; }); }
+function onCred(resp){ gErr.textContent="Signing in…";
+  google.script.run.withSuccessHandler(d=>{ store.set("tok",d.tok); store.set("me",d.name); store.set("pass",""); gErr.textContent=""; gate.hidden=true; showMe(); showToast(`Signed in as ${d.name}`); pull(); })
+    .withFailureHandler(e=>{ gErr.textContent=String(e&&e.message||e).replace(/^SIGNIN:\s*/,""); }).login(resp.credential); }
 function errText(e){ const m=String(e&&e.message||e||"");
-  if(/PASSCODE/.test(m)){ store.set("pass",""); askPass("Wrong passcode. 3 wrong tries lock the app for 3 hours."); return "Passcode needed."; }
+  if(/SIGNIN|PASSCODE/.test(m)){ store.set("tok",""); askPass(m.replace(/^SIGNIN:\s*/,"")); return "Please sign in."; }
   if(/Locked/.test(m)){ if(!gate.hidden) gErr.textContent=m; return m; }
   if(/permission|access|not have|denied|authoriz/i.test(m)) return "This Google account can't open the expense sheet. Ask Aditya to share it with you.";
   return m || "Couldn't reach Google just now. Tap Sync to try again."; }
@@ -1016,7 +1028,7 @@ function save(cat,sub,btn){
   if(A.saving) return; const amt=evalExpr(A.expr); if(!(amt>0)){ ovBack(); aErr.textContent="Enter the amount first."; return; }
   A.saving=true; aErr.textContent=""; const ed=A.edit;
   const payload={amount:amt,category:cat,houseSub:sub,paidBy:A.paid,needWant:A.nw,expenseFor:A.forW,date:aDate.value,note:document.getElementById('aNote').value.trim()};
-  payload.rid=A.rid; payload.addedBy=ME();
+  payload.rid=A.rid;
   if(ed){ payload.row=ed.rn; payload.ts=ed.ts; payload.oldAmt=ed.a; }
   // Saved on the phone at once; sent to the sheet in the background (kept and retried if offline).
   OUT.push({kind:ed?"edit":"add",p:payload,at:Date.now()}); saveOut();
@@ -1036,7 +1048,7 @@ function openEntry(rn){ const r=ROWS.find(x=>x.rn===rn); if(!r) return; eRow=r; 
   const full=`${["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][r.d.getDay()]}, ${r.d.getDate()} ${MONL[r.d.getMonth()]} ${r.d.getFullYear()}`;
   const added=[fmtStamp(r.ts), whoAdded(r)?("by "+whoAdded(r)):(r.ts?"in the app":"")].filter(Boolean).join(" · ");
   const rowsH=[["Category",`<span class="ecat" style="--cc:${col}">${icon(r.c,col)}${esc(r.c)}${r.s?` · ${esc(r.s.replace("House - ",""))}`:""}</span>`],
-    ["Date",esc(full)],["Paid by",esc(r.p||"—")],["Expense type",esc(r.nw||"—")],["Expense for",esc(r.f||"Not set")],["Added",esc(added||"—")],["Sheet row",r.rn?String(r.rn):"Syncing…"]];
+    ["Date",esc(full)],["Paid by",esc(r.p||"—")],["Expense type",esc(r.nw||"—")],["Expense for",esc(r.f||"Not set")],["Added",esc(added||"—")],...(r.eb?[["Last edited",esc([fmtStamp(r.ea),"by "+r.eb].filter(Boolean).join(" · "))]]:[]),["Sheet row",r.rn?String(r.rn):"Syncing…"]];
   document.getElementById('eList').innerHTML=rowsH.map(([k,v])=>`<dt>${k}</dt><dd>${v}</dd>`).join("");
   document.getElementById('eS').textContent="Tip: swipe left on an entry to edit it, long-press to delete it.";
   eSheet.hidden=false; ovOpen(hideE); }
@@ -1057,11 +1069,11 @@ document.getElementById('dGo').onclick=()=>{ const r=dRow; if(!r) return; ovClos
   showToast(`Deleted ${inr(r.a)} · ${r.c}`); flush(); };
 document.addEventListener('contextmenu',e=>{ const t=e.target.closest&&e.target.closest('.txw[data-rn]'); if(t&&!e.target.closest('#addSheet,#eSheet')){ e.preventDefault(); askDelete(+t.dataset.rn); } });
 /* who uses this phone (shown as "Added … by …" on new entries) */
-const wSheet=document.getElementById('wSheet'), meBtn=document.getElementById('meBtn');
-function showMe(){ meBtn.textContent=ME()?`This phone: ${ME()} · change`:"Set who uses this phone"; }
-function askWho(){ wSheet.hidden=false; }
-wSheet.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{ store.set("me",b.dataset.w); wSheet.hidden=true; showMe(); showToast(`This phone: ${b.dataset.w}`); });
-meBtn.onclick=askWho; showMe();
+const meBtn=document.getElementById('meBtn');
+function showMe(){ meBtn.textContent=PW()&&ME()?`Signed in as ${ME()} · Sign out`:""; meBtn.hidden=!(PW()&&ME()); }
+meBtn.onclick=()=>{ if(OUT.length){ showToast(`Wait — ${OUT.length} change(s) still syncing.`); return; } if(!confirm(`Sign out ${ME()} from this phone?`)) return;
+  const t=PW(); try{ google.script.run.logout(t); }catch(_){} store.set("tok",""); store.set("me",""); showMe(); try{ google.accounts&&google.accounts.id.disableAutoSelect(); }catch(_){} askPass(""); };
+showMe();
 document.addEventListener('click',e=>{ if(Date.now()-swipedAt<400) return;
   const a=e.target.closest('.txa'); if(a){ const w=a.closest('.txw'); w.classList.remove('open'); const r=ROWS.find(x=>x.rn===+w.dataset.rn); if(r) openEdit(r); return; }
   const t=e.target.closest('.txw[data-rn]'); if(!t||e.target.closest('#addSheet,#eSheet')) return;
@@ -1084,7 +1096,7 @@ document.addEventListener('click',e=>{ if(Date.now()-swipedAt<400) return;
   document.addEventListener('touchend',()=>{ lpStop(); if(lpDone){ lpDone=false; swipedAt=Date.now(); return; } if(!w) return; if(drag){ const tx=w.querySelector('.tx'); tx.style.transition=''; tx.style.transform=''; w.classList.toggle('open',dx<-W/2); swipedAt=Date.now(); } w=null; },{passive:true});
 })();
 /* updates: a banner when a new version is published */
-const APP_VERSION="2.0";
+const APP_VERSION="2.1";
 document.getElementById('verTxt').textContent="Version "+APP_VERSION;
 async function checkUpdate(manual){ try{ const j=await (await fetch('version.json?t='+Date.now(),{cache:'no-store'})).json();
     if(j.v&&j.v!==APP_VERSION){ document.getElementById('updTxt').textContent=j.note?`New version: ${j.note}`:"A new version is ready"; document.getElementById('upd').hidden=false; }
@@ -1108,7 +1120,7 @@ eSheet.addEventListener('click',e=>{ if(e.target===eSheet) ovClose(hideE); });
 document.getElementById('eDel').onclick=()=>{ const r=eRow; if(OV[OV.length-1]===hideE){ OV.pop(); ovReuse=true; } hideE(); askDelete(r.rn); };
 document.getElementById('eEdit').onclick=()=>{ if(OV[OV.length-1]===hideE){ OV.pop(); ovReuse=true; } hideE(); openEdit(eRow); };
 
-render(); pull(); if(PW()&&!ME()) askWho();
+render(); pull();
 })();
 </script>
 
