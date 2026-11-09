@@ -1,4 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ypgkqQxQEwxlfIcMeW8vuBc2iS6s7lQm/VwjWQuyR7Y=' 'sha256-/6s5KKwOHGbXqd8lHFJ6wHTZGHtD/qBo0oDjHUN6f9c=' 'sha256-4TnXtIb2hqQVmNou/OY4hB7NV0B8DrEc91PWOvoDR0o=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>try{var s=JSON.parse(localStorage.getItem("acx:skin")||"\"\"");if(s)document.documentElement.setAttribute("data-skin",s);}catch(e){}</script>
 <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)"><link rel="manifest" href="manifest.webmanifest"><style>[hidden]{display:none!important}</style><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
@@ -502,7 +503,7 @@ input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:d
   <div class="res" id="res"></div>
 </div>
 
-<div class="gate" id="gate" hidden><form id="gForm" onsubmit="return false"><img class="logo" src="icon-192.png" alt=""><h2>Adi &amp; Choti Kharcha</h2><p>Sign in with your Google account. Only Aditya and Choti can get in.</p><div id="gBtn" class="gbtn"></div><div class="err" id="gErr" role="alert"></div></form></div>
+<div class="gate" id="gate" hidden><form id="gForm"><img class="logo" src="icon-192.png" alt=""><h2>Adi &amp; Choti Kharcha</h2><p>Sign in with your Google account. Only Aditya and Choti can get in.</p><div id="gBtn" class="gbtn"></div><div class="err" id="gErr" role="alert"></div></form></div>
 <div class="esheet" id="eSheet" hidden><div class="box"><div class="eamt num" id="eAmt"></div><div class="t" id="eT"></div><dl class="elist" id="eList"></dl><div class="s" id="eS"></div>
 <button class="go" id="eEdit" type="button">Edit this expense</button><button class="x del" id="eDel" type="button">Delete this expense</button><button class="x" id="eClose" type="button">Close</button></div></div>
 <div class="esheet" id="dSheet" hidden><div class="box"><div class="t">Delete this expense?</div><div class="eamt num" id="dAmt"></div><div class="s" id="dT"></div><div class="s">It is removed from the sheet for both of you. The nightly backup keeps the old copy for 30 days.</div><button class="go red" id="dGo" type="button">Delete</button><button class="x" id="dNo" type="button">Cancel</button></div></div>
@@ -544,7 +545,15 @@ input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:d
 <div class="toast" id="toast" role="status" hidden></div>
 <script>
 /* Talks to the Google Sheet through the Apps Script JSON API (no Google sign-in cookies involved). */
-const API='https://script.google.com/macros/s/AKfycbzzPtuZdGrHct1LmXYAxHjQBAQ0rOXgvcJox2p6YHP5en5X04kPVTte4GpYDA-Hzt6mKw/exec';
+/* Backend address: stored on this phone, set from the private setup link (…/#k=<deployment id>).
+   LEGACY is a one-time fallback so phones that already use Kharcha keep working; it will be removed from this public code. */
+const API=(()=>{ const K="acx:api", ok=u=>/^https:\/\/script\.google\.com\/macros\/s\/[\w-]{20,}\/exec$/.test(u||"");
+  const LEGACY='https://script.google.com/macros/s/AKfycbzzPtuZdGrHct1LmXYAxHjQBAQ0rOXgvcJox2p6YHP5en5X04kPVTte4GpYDA-Hzt6mKw/exec';
+  const m=/[#&?]k=([\w-]{20,})/.exec(location.hash||"");
+  if(m){ try{ localStorage.setItem(K,JSON.stringify("https://script.google.com/macros/s/"+m[1]+"/exec")); }catch(e){} history.replaceState(null,"",location.pathname+location.search); }
+  let u=""; try{ u=JSON.parse(localStorage.getItem(K)||'""'); }catch(e){}
+  if(!ok(u)){ u=LEGACY; try{ localStorage.setItem(K,JSON.stringify(u)); }catch(e){} }
+  return u; })();
 window.google={script:{run:(function(){
   function mk(ok,bad){return new Proxy({},{get(_,name){
     if(name==="withSuccessHandler") return f=>mk(f,bad);
@@ -565,8 +574,10 @@ if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch
 </script>
 <script>
 (()=>{
-const FILE_ID="1PPb1H4rBfvQ5djOWC2mjvbAncmT44YdZrzpRtV8KH0Y";
-document.getElementById('sheetLink').href="https://docs.google.com/spreadsheets/d/"+FILE_ID+"/edit";
+/* links from the sheet: only https:// is allowed (never javascript: or data:) */
+const safeUrl=u=>{ try{ const x=new URL(String(u||""),location.href); if(x.protocol==="https:") return x.href; }catch(e){} return "#"; };
+function setSheetLink(u){ const a=document.getElementById('sheetLink'), s=safeUrl(u); a.href=s; a.hidden=s==="#"; }
+document.getElementById('gForm').addEventListener('submit',e=>e.preventDefault());
 
 /* ---------- icons (24px line art) ---------- */
 const P={
@@ -751,7 +762,7 @@ function txHTML(r,withIcon){
   const meta=[...(withIcon?[esc(r.c)]:[]),fmtDate(r),`Paid by ${esc(r.p||"—")}`];
   const chips=[]; if(r.nw) chips.push(`<span class="chip ${r.nw==='Want'?'w':'nd'}">${esc(r.nw)}</span>`);
   if(r.f) chips.push(`<span class="chip">For ${esc(r.f)}</span>`); if(r.s) chips.push(`<span class="chip">${esc(r.s)}</span>`); if(r.pending) chips.unshift(`<span class="chip sync">Syncing…</span>`);
-  return `<div class="txw" data-rn="${r.rn}"><button class="txa" type="button" tabindex="-1" aria-hidden="true">Edit</button><div class="tx">${withIcon?`<span class="ic">${icon(r.c,catMeta(r.c)[1])}</span>`:''}<span class="n">${esc(r.n||r.c)}</span><span class="amt num">${inr(r.a)}</span>
+  return `<div class="txw" data-rn="${Number(r.rn)||0}"><button class="txa" type="button" tabindex="-1" aria-hidden="true">Edit</button><div class="tx">${withIcon?`<span class="ic">${icon(r.c,catMeta(r.c)[1])}</span>`:''}<span class="n">${esc(r.n||r.c)}</span><span class="amt num">${inr(r.a)}</span>
     <span class="m"><span>${meta.join(" · ")}</span>${chips.join("")}</span></div></div>`;
 }
 const byRecent=(a,b)=>(b.iso.localeCompare(a.iso))||(b.ts.localeCompare(a.ts));
@@ -885,7 +896,7 @@ function withPending(rows){ let out=rows;
     else out=out.map(r=>r.rn===it.p.row?{...r,...asRow(it.p)}:r); }
   return out; }
 function liveLine(){ return `Live · ${SERVER.length.toLocaleString('en-IN')} entries · synced ${fmtWhen(CACHE_AT)}`+(OUT.length?` · ${OUT.length} waiting to sync`:""); }
-{ const c=store.get("cache",null); if(c&&c.rows&&c.rows.length){ SERVER=toRows(c.rows); LOADING=false; CACHE_AT=c.at||0; } ROWS=withPending(SERVER); }
+{ const c=store.get("cache",null); if(c&&c.rows&&c.rows.length){ SERVER=toRows(c.rows); LOADING=false; CACHE_AT=c.at||0; } setSheetLink(c&&c.url); ROWS=withPending(SERVER); }
 function showToast(t,ms){ toast.textContent=t; toast.hidden=false; clearTimeout(showToast.t); showToast.t=setTimeout(()=>toast.hidden=true,ms||2600); }
 function flush(){ if(flushing||!OUT.length||!PW()) return; flushing=true; const it=OUT[0];
   google.script.run.withSuccessHandler(d=>{ flushing=false; OUT.shift();
@@ -893,14 +904,14 @@ function flush(){ if(flushing||!OUT.length||!PW()) return; flushing=true; const 
     saveOut(); applyData(d); flush(); })
     .withFailureHandler(x=>{ flushing=false; const m=String(x&&x.message||x);
       if(x&&x.net){ setSync("warn",`Offline · ${OUT.length} waiting to sync · they'll go when you're back online`); return; }
-      if(/SIGNIN|PASSCODE|Locked/.test(m)){ setSync("warn",errText(x)); return; }
+      if(/SIGNIN|Locked/.test(m)){ setSync("warn",errText(x)); return; }
       OUT.shift(); saveOut(); ROWS=withPending(SERVER); render();
       showToast(`${it.kind==="del"?"Not deleted":"Not saved"}: ${inr(it.p.amount)} · ${it.p.category} — ${m}`,7000); setSync("warn",`One change wasn't saved: ${m}`); flush(); })
     [{add:"addExpense",edit:"updateExpense",del:"deleteExpense"}[it.kind]](it.p,PW()); }
 addEventListener('online',()=>{ flush(); pull(); });
 function applyData(d){
   LOADING=false; SERVER=toRows(d.rows||[]); ROWS=withPending(SERVER); USER=(d.user||"").toLowerCase();
-  store.set("cache",{rows:d.rows||[],at:Date.now()});
+  store.set("cache",{rows:d.rows||[],at:Date.now(),url:d.url||""}); setSheetLink(d.url);
   render(); if(!drawer.hidden) buildDrawer(); if(!sheet.hidden) doSearch();
   CACHE_AT=Date.now(); setSync(OUT.length?"warn":"live",liveLine());
 }
@@ -908,6 +919,7 @@ const gate=document.getElementById('gate'), gIn=document.getElementById('gIn'), 
 /* sign in with Google: the script checks the account and gives this phone its own session key */
 const CLIENT_ID="816088287548-9r600bocno2f00uf2p319cdg0f8bcov7.apps.googleusercontent.com";
 const PW=()=>store.get("tok","");
+try{ localStorage.removeItem("acx:pass"); }catch(e){} // the old family passcode is no longer used
 const ME=()=>store.get("me","");
 let gsi=null;
 function loadGSI(){ return gsi||(gsi=new Promise((ok,bad)=>{ const s=document.createElement('script'); s.src="https://accounts.google.com/gsi/client"; s.async=true;
@@ -917,7 +929,7 @@ function askPass(msg){ gErr.textContent=msg||""; gate.hidden=false;
     const b=document.getElementById('gBtn'); b.innerHTML=""; google.accounts.id.renderButton(b,{theme:"filled_blue",size:"large",shape:"pill",text:"signin_with",width:260}); })
   .catch(()=>{ gErr.textContent="Couldn't load Google sign-in. Check your internet and reopen the app."; }); }
 function onCred(resp){ gErr.textContent="Signing in…";
-  google.script.run.withSuccessHandler(d=>{ store.set("tok",d.tok); store.set("me",d.name); store.set("pass",""); gErr.textContent=""; gate.hidden=true; showMe(); showToast(`Signed in as ${d.name}`); pull(); })
+  google.script.run.withSuccessHandler(d=>{ store.set("tok",d.tok); store.set("me",d.name); gErr.textContent=""; gate.hidden=true; showMe(); showToast(`Signed in as ${d.name}`); pull(); })
     .withFailureHandler(e=>{ gErr.textContent=String(e&&e.message||e).replace(/^SIGNIN:\s*/,""); }).login(resp.credential); }
 function errText(e){ const m=String(e&&e.message||e||"");
   if(/SIGNIN|PASSCODE/.test(m)){ store.set("tok",""); askPass(m.replace(/^SIGNIN:\s*/,"")); return "Please sign in."; }
@@ -1108,7 +1120,7 @@ document.addEventListener('click',e=>{ if(Date.now()-swipedAt<400) return;
   document.addEventListener('touchend',()=>{ lpStop(); if(lpDone){ lpDone=false; swipedAt=Date.now(); return; } if(!w) return; if(drag){ const tx=w.querySelector('.tx'); tx.style.transition=''; tx.style.transform=''; w.classList.toggle('open',dx<-W/2); swipedAt=Date.now(); } w=null; },{passive:true});
 })();
 /* updates: a banner when a new version is published */
-const APP_VERSION="2.2";
+const APP_VERSION="2.3";
 document.getElementById('verTxt').textContent="Version "+APP_VERSION;
 /* update card: never pops over an open sheet, the add screen or while typing; waits until you're back on the main screen */
 let UPD=null, updT=0; const $u=id=>document.getElementById(id);
