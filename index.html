@@ -351,10 +351,18 @@ header.top{grid-template-columns:auto 1fr auto}
 .who b::after{content:" ⇄";font-weight:400;font-size:12px;color:var(--muted)}
 .adate span::after{content:" ▾";font-size:11px;color:var(--muted)}
 .add .hint{margin:0}
-.upd{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));z-index:19;display:flex;align-items:center;gap:12px;
-  padding:8px 8px 8px 16px;border-radius:999px;background:var(--surface);box-shadow:0 6px 24px rgba(0,0,0,.16);font-size:13.5px;white-space:nowrap;max-width:calc(100vw - 32px)}
-.upd span{overflow:hidden;text-overflow:ellipsis}
-.upd button{background:var(--tint);color:var(--head-ink);font-weight:600;border-radius:999px;padding:7px 14px;flex:none}
+.upd{position:fixed;left:16px;right:16px;margin:0 auto;max-width:440px;bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:19;padding:16px;border-radius:20px;
+  background:var(--surface);color:var(--ink);box-shadow:0 0 0 .5px var(--line),0 12px 32px rgba(0,0,0,.18)}
+.upd-h{display:flex;gap:12px;align-items:flex-start}
+.upd-i{flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--tint) 15%,transparent);color:var(--tint)}
+.upd-i svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.upd-t{min-width:0}.upd-t b{display:block;font:600 15px var(--body)}
+.upd-t p{margin:3px 0 0;font-size:13px;line-height:1.4;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.upd-t p:empty{display:none}
+.upd-b{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.upd-b button{border-radius:999px;padding:8px 16px;font:600 13.5px var(--body)}
+#updLater{color:var(--muted);background:color-mix(in srgb,var(--ink) 7%,transparent)}
+#updBtn{background:var(--tint);color:var(--head-ink)}
 .eamt{font:700 34px var(--display);letter-spacing:-.03em;color:var(--spend)}
 .esheet .t{font:500 16px var(--body);color:var(--ink)}
 .elist{margin:0;display:grid;grid-template-columns:auto 1fr;background:var(--surface);border-radius:14px;overflow:hidden}
@@ -466,7 +474,11 @@ input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:d
   </div></div>
 </div>
 
-<div class="upd" id="upd" hidden><span id="updTxt">A new version is ready</span><button type="button" id="updBtn">Update</button></div>
+<div class="upd" id="upd" role="dialog" aria-labelledby="updTitle" hidden>
+  <div class="upd-h"><span class="upd-i"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg></span>
+    <div class="upd-t"><b id="updTitle">A new version is ready</b><p id="updTxt"></p></div></div>
+  <div class="upd-b"><button type="button" id="updLater">Later</button><button type="button" id="updBtn">Update now</button></div>
+</div>
 <div class="ptr" id="ptr" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4"/></svg></div>
 <div class="scrim" id="scrim" hidden></div>
 <aside class="drawer" id="drawer" hidden aria-label="Filters">
@@ -1096,16 +1108,23 @@ document.addEventListener('click',e=>{ if(Date.now()-swipedAt<400) return;
   document.addEventListener('touchend',()=>{ lpStop(); if(lpDone){ lpDone=false; swipedAt=Date.now(); return; } if(!w) return; if(drag){ const tx=w.querySelector('.tx'); tx.style.transition=''; tx.style.transform=''; w.classList.toggle('open',dx<-W/2); swipedAt=Date.now(); } w=null; },{passive:true});
 })();
 /* updates: a banner when a new version is published */
-const APP_VERSION="2.1";
+const APP_VERSION="2.2";
 document.getElementById('verTxt').textContent="Version "+APP_VERSION;
+/* update card: never pops over an open sheet, the add screen or while typing; waits until you're back on the main screen */
+let UPD=null, updT=0; const $u=id=>document.getElementById(id);
+const updShort=n=>{ n=(n||"").trim(); const f=n.split(/,\s*/); return f.length>2?f.slice(0,2).join(", ")+" and more":n; };
+function updBusy(){ return !!document.querySelector('#addSheet:not([hidden]),#sheet:not([hidden]),#eSheet:not([hidden]),#dSheet:not([hidden]),#gate:not([hidden])')||!!document.activeElement?.matches?.('input,textarea,select'); }
+function showUpd(){ clearTimeout(updT); if(!UPD) return; if(updBusy()){ updT=setTimeout(showUpd,3000); return; }
+  $u('updTitle').textContent=`Kharcha ${UPD.v} is ready`; $u('updTxt').textContent=updShort(UPD.note); $u('updBtn').textContent="Update now"; $u('upd').hidden=false; }
 async function checkUpdate(manual){ try{ const j=await (await fetch('version.json?t='+Date.now(),{cache:'no-store'})).json();
-    if(j.v&&j.v!==APP_VERSION){ document.getElementById('updTxt').textContent=j.note?`New version: ${j.note}`:"A new version is ready"; document.getElementById('upd').hidden=false; }
+    if(j.v&&j.v!==APP_VERSION){ UPD=j; if(manual||store.get("updLater")!==j.v) showUpd(); }
     else if(manual) showToast("You're on the latest version"); }
   catch(e){ if(manual) showToast("Couldn't check — you seem to be offline"); } }
-async function doUpdate(){ document.getElementById('updBtn').textContent="Updating…";
-  try{ const reg=await navigator.serviceWorker?.getRegistration(); if(reg) await reg.update(); const ks=await caches.keys(); await Promise.all(ks.map(k=>caches.delete(k))); }catch(e){}
+async function doUpdate(){ $u('updBtn').textContent="Updating…";
+  try{ const reg=await navigator.serviceWorker?.getRegistration(); if(reg) await reg.update(); const ks=await caches.keys(); await Promise.all(ks.filter(k=>k.startsWith('kharcha-')).map(k=>caches.delete(k))); }catch(e){}
   location.reload(); }
-document.getElementById('updBtn').onclick=doUpdate;
+$u('updBtn').onclick=doUpdate;
+$u('updLater').onclick=()=>{ if(UPD) store.set("updLater",UPD.v); clearTimeout(updT); $u('upd').hidden=true; showToast("OK — tap Check for updates whenever you're ready"); };
 document.getElementById('verBtn').onclick=()=>checkUpdate(true);
 setTimeout(checkUpdate,2500); document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==="visible") checkUpdate(); });
 /* pull down at the top to sync */
