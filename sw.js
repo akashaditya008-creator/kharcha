@@ -1,8 +1,8 @@
-// Kharcha app shell (2.5).
+// Kharcha app shell (2.6).
 // · Opens instantly from the saved copy, then refreshes that copy from the network in the background.
 // · Every downloaded copy of the app page is checked (size + a marker) before it is saved, so an empty or
 //   cut-off file from the server can never replace a working app: the last good copy keeps being served.
-const C="kharcha-v14", F=["./","index.html","manifest.webmanifest","icon-192.png","icon-512.png"];
+const C="kharcha-v15", F=["./","index.html","manifest.webmanifest","icon-192.png","icon-512.png"];
 const MIN={"./":40000,"index.html":40000}, MARK="APP_VERSION";
 const keyOf=u=>u.pathname.endsWith("/")?"./":u.pathname.replace(/^.*\//,"");
 /* resolves to the Response only if it looks like a real copy of that file */

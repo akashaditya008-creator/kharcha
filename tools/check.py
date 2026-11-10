@@ -86,6 +86,38 @@ else:
         ctx.set_offline(True); pg.reload(); pg.wait_for_timeout(2500)
         ok(pg.evaluate("document.getElementById('verTxt')&&document.getElementById('verTxt').textContent") == "Version " + v, "opens with no internet from the saved copy")
         pg.screenshot(path=os.path.join(os.environ.get("CHECK_OUT", tempfile.gettempdir()), "kharcha-check.png"))
+        ctx.close()
+        # signed in, against a fake backend: the Artha look, taps that answer, and the saved moment
+        import datetime
+        ym = datetime.date.today().strftime("%Y-%m")
+        ROWS = [[ym + "-02", 18300, "Aditya", "House", "Need", "Rent", "Both", "House - Rent", ym + "-02T09:00:00", 2, "a", "", ""],
+                [ym + "-03", 640, "Choti", "Eating Out", "Want", "Dinner", "Both", "", ym + "-03T21:00:00", 3, "a", "", ""]]
+        ctx = b.new_context(viewport={"width": 412, "height": 900}, has_touch=True, service_workers="block")
+        pg = ctx.new_page(); errs = []
+        pg.on("pageerror", lambda e: errs.append(str(e)))
+        pg.route("https://script.google.com/**", lambda r: r.fulfill(status=200, content_type="application/json", body=json.dumps({"ok": True, "d": {"rows": ROWS, "user": "Aditya", "email": "a", "at": "2026-11-10T10:00:00Z", "url": ""}})))
+        pg.route("https://accounts.google.com/**", lambda r: r.fulfill(status=200, content_type="text/javascript", body=""))
+        pg.route("https://fonts.googleapis.com/**", lambda r: r.fulfill(status=200, content_type="text/css", body=""))
+        pg.add_init_script("localStorage.setItem('acx:tok',JSON.stringify('" + "a" * 64 + "'));localStorage.setItem('acx:me',JSON.stringify('Aditya'))")
+        pg.goto(f"http://127.0.0.1:{port}/index.html"); pg.wait_for_timeout(3000)
+        ok(pg.evaluate("document.documentElement.getAttribute('data-skin')") == "deck", "a phone opening 2.6 for the first time gets the Artha look")
+        ok("₹" in pg.evaluate("document.getElementById('stage').textContent"), "the spending ring shows amounts when signed in")
+        ok(pg.evaluate("(()=>{const c=document.getElementById('bgk');const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;for(let i=3;i<d.length;i+=400)if(d[i])return true;return false;})()"), "the moving background is drawing")
+        pg.evaluate("(()=>{const e=document.getElementById('addBtn'),r=e.getBoundingClientRect();e.dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,clientX:r.left+20,clientY:r.top+10}));})()")
+        ok(pg.evaluate("!!document.querySelector('.tapd')&&document.querySelector('.rip').classList.contains('go')"), "a tap tilts the control and starts the light ripple")
+        pg.evaluate("dispatchEvent(new PointerEvent('pointerup'))"); pg.click("#addBtn"); pg.wait_for_timeout(700)
+        for k in "450": pg.evaluate("k=>[...document.querySelectorAll('#addSheet button')].find(b=>b.innerText.trim()===k).click()", k)
+        pg.click("#aChoose"); pg.wait_for_timeout(500)
+        pg.evaluate("[...document.querySelectorAll('.card')].filter(c=>c.offsetParent&&/Eating|Transport|Bills/.test(c.innerText))[0].click()"); pg.wait_for_timeout(1700)
+        y = pg.evaluate("(document.querySelector('.yay')||{}).innerText||''")
+        ok("₹450" in y and "This month so far" in y, "saving an expense shows the saved moment (" + y.replace("\n", " · ")[:70] + ")")
+        ok(pg.evaluate("getComputedStyle(document.querySelector('.yay')).pointerEvents") == "none", "the saved moment lets touches through")
+        pg.evaluate("dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,clientX:5,clientY:300}))"); pg.wait_for_timeout(600)
+        ok(pg.evaluate("!document.querySelector('.yay')"), "the next touch sends the saved moment away")
+        pg.evaluate("localStorage.setItem('acx:skin',JSON.stringify('simple'))"); pg.reload(); pg.wait_for_timeout(2500)
+        ok(pg.evaluate("document.documentElement.getAttribute('data-skin')") == "simple" and pg.evaluate("getComputedStyle(document.getElementById('bgk')).display") == "none", "another theme chosen in the menu is kept, with the background off")
+        ok(not errs, "no JavaScript errors signed in" + ("" if not errs else ": " + errs[0][:160]))
+        pg.screenshot(path=os.path.join(os.environ.get("CHECK_OUT", tempfile.gettempdir()), "kharcha-signed-in.png"))
         ctx.close(); b.close()
     srv.shutdown()
 

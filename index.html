@@ -1,7 +1,7 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-ypgkqQxQEwxlfIcMeW8vuBc2iS6s7lQm/VwjWQuyR7Y=' 'sha256-/6s5KKwOHGbXqd8lHFJ6wHTZGHtD/qBo0oDjHUN6f9c=' 'sha256-H9+NxciWY6NB6KBc2Axa68AjGmwcBvz+iZnER7Gl30A=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-TuzRORtSw8q8MZwQhjsJWjLTptn/qoBBV9+dP1oSJgk=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-NoCIZG0QGwa37BgCdVQ320xwG9RIvr439tL/0HtXSsQ=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<script>try{var s=JSON.parse(localStorage.getItem("acx:skin")||"\"\"");if(s)document.documentElement.setAttribute("data-skin",s);}catch(e){}</script>
+<script>try{var s=JSON.parse(localStorage.getItem("acx:skin")||"\"\"");if(!localStorage.getItem("acx:deck26"))s="deck";if(s)document.documentElement.setAttribute("data-skin",s);}catch(e){}</script>
 <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)"><meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)"><link rel="manifest" href="manifest.webmanifest"><style>[hidden]{display:none!important}</style><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
 <title>Adi &amp; Choti Kharcha</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -439,8 +439,57 @@ input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:d
   .gate:not([hidden]) form{animation:cardin .5s var(--ease)}
 }
 @media (prefers-reduced-motion:reduce){ .card,.txs,.toast{animation:none} .tx{transition:none} }
+
+/* ================= 2.6: the Artha look. A dark 3D deck: floating objects behind, a ring that tilts, taps that answer ================= */
+:root[data-skin="deck"]{--bg:#04070C;--surface:#0C141D;--ink:#E8F3F7;--muted:#9DB1BF;--line:rgba(130,220,255,.16);--tint:#3CF0D4;--head:#3CF0D4;--head-ink:#03100E;--head-muted:rgba(3,16,14,.72);
+  --accent:#FFB547;--spend:#FF8A93;--spend-soft:#3A1C22;--ok:#2BD99F;--chip:rgba(130,220,255,.10);--scrim:rgba(0,0,0,.6);--bar:rgba(6,11,18,.66);--press:rgba(255,255,255,.07);color-scheme:dark}
+#bgk{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none;display:none}
+:root[data-skin="deck"] #bgk{display:block}
+:root[data-skin="deck"] .app{position:relative;z-index:1;background:transparent}
+:root[data-skin="deck"] header.top{border-bottom:1px solid var(--line)}
+:root[data-skin="deck"] .brand h1{background:linear-gradient(90deg,var(--ink),var(--tint));-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin="deck"] .brand p{color:var(--muted)}
+:root[data-skin="deck"] .card,:root[data-skin="deck"] .lines,:root[data-skin="deck"] .today,:root[data-skin="deck"] .txs{border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 82%,transparent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 16px 30px -20px #000;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+:root[data-skin="deck"] .tx{background:transparent}
+:root[data-skin="deck"] .res .tx{background:transparent}
+:root[data-skin="deck"] .drawer,:root[data-skin="deck"] .sheet,:root[data-skin="deck"] .add{background:rgba(5,9,15,.93);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px)}
+:root[data-skin="deck"] .drawer{border-right:1px solid var(--line)}
+:root[data-skin="deck"] .addb{box-shadow:0 0 0 1px color-mix(in srgb,var(--tint) 60%,transparent),0 12px 30px -8px var(--tint)}
+:root[data-skin="deck"] .toast{background:rgba(16,27,38,.94);color:var(--ink);border:1px solid var(--line)}
+:root[data-skin="deck"] .stage{perspective:900px}
+@media (prefers-reduced-motion:no-preference){
+  :root[data-skin="deck"] .stage svg{transform:rotateX(calc(22deg + var(--gy,0)*5deg)) rotateY(calc(var(--gx,0)*7deg));transform-origin:50% 55%;transition:transform .5s var(--ease);
+    filter:drop-shadow(0 22px 22px rgba(0,0,0,.55)) drop-shadow(0 0 16px color-mix(in srgb,var(--tint) 22%,transparent))}
+  :root[data-skin="deck"] .stage.swell svg{animation:kswell .9s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes kswell{0%{transform:rotateX(22deg) scale(1)}32%{transform:rotateX(6deg) scale(1.07)}100%{transform:rotateX(22deg) scale(1)}}
+  :root[data-skin="deck"] .add:not([hidden]),:root[data-skin="deck"] .sheet:not([hidden]){animation:ksheet .46s var(--ease)}
+  @keyframes ksheet{from{opacity:.2;transform:perspective(1000px) translateY(40%) rotateX(14deg) scale(.96)}to{opacity:1;transform:none}}
+  :root[data-skin="deck"] .esheet:not([hidden]) .box{animation:ksheet .42s var(--ease)}
+  :root[data-skin="deck"] .drawer:not([hidden]){animation:kdrawer .42s var(--ease)}
+  @keyframes kdrawer{from{opacity:.4;transform:perspective(900px) translateX(-100%) rotateY(26deg)}to{opacity:1;transform:none}}
+  .tapd{transform:perspective(520px) rotateX(calc(var(--ty,0)*var(--tk,8)*-1deg)) rotateY(calc(var(--tx,0)*var(--tk,8)*1deg)) scale(.962)!important;transition:transform .09s var(--ease),filter .09s!important;filter:brightness(1.14)}
+  .rip.go{animation:rip .55s var(--ease)}
+  @keyframes rip{from{opacity:.7;transform:scale(1)}to{opacity:0;transform:scale(9)}}
+}
+.rip{position:fixed;left:-99px;top:-99px;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;border:2px solid var(--tint);opacity:0;pointer-events:none;z-index:70}
+/* after a save: a tick, the amount rolling up, the category and the month so far. Touches pass through it; the next touch sends it away. */
+.yay{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));z-index:61;transform:translate(-50%,0);display:grid;justify-items:center;gap:6px;padding:18px 24px;border-radius:24px;
+  min-width:min(280px,84vw);text-align:center;pointer-events:none;background:color-mix(in srgb,var(--surface) 92%,transparent);border:1px solid var(--tint);color:var(--ink);
+  box-shadow:0 26px 60px -22px color-mix(in srgb,var(--tint) 70%,#000);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);animation:yayup .5s cubic-bezier(.34,1.56,.64,1) both}
+.yay.bye{animation:yaydown .32s var(--ease) forwards}
+@keyframes yayup{from{opacity:0;transform:translate(-50%,36px) scale(.9)}}
+@keyframes yaydown{to{opacity:0;transform:translate(-50%,22px) scale(.95)}}
+.yay .tick{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--tint)}
+.yay .tick svg{width:24px;height:24px;fill:none;stroke:var(--head-ink);stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:30;stroke-dashoffset:30;animation:ytick .45s .2s var(--ease) forwards}
+@keyframes ytick{to{stroke-dashoffset:0}}
+.yay .yamt{font:700 30px var(--display);font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.yay b{font:600 16px var(--body)}
+.yay small{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){ .yay,.yay.bye{animation:none} .yay .tick svg{animation:none;stroke-dashoffset:0} .rip{display:none} }
 </style>
 
+<canvas id="bgk" aria-hidden="true"></canvas>
 <div class="app">
   <header class="top">
     <button class="ib cap" id="menuBtn" aria-label="View options: who, what and period"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10M14 4.5v5M8 14.5v5"/></svg><i>View</i></button>
@@ -545,8 +594,8 @@ input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:d
 <div class="toast" id="toast" role="status" hidden></div>
 <script>
 /* Talks to the Google Sheet through the Apps Script JSON API (no Google sign-in cookies involved). */
-/* Backend address: stored on this phone, set from the private setup link (…/#k=<deployment id>).
-   LEGACY is a one-time fallback so phones that already use Kharcha keep working; it will be removed from this public code. */
+/* Backend address: built in, so a new phone needs no setup link: open Kharcha, sign in with Google, and the backend lets in only
+   the allowed accounts. A setup link (…/#k=<deployment id>) still works and wins, for a moved backend. */
 const API=(()=>{ const K="acx:api", ok=u=>/^https:\/\/script\.google\.com\/macros\/s\/[\w-]{20,}\/exec$/.test(u||"");
   const LEGACY='https://script.google.com/macros/s/AKfycbzzPtuZdGrHct1LmXYAxHjQBAQ0rOXgvcJox2p6YHP5en5X04kPVTte4GpYDA-Hzt6mKw/exec';
   const m=/[#&?]k=([\w-]{20,})/.exec(location.hash||"");
@@ -830,6 +879,7 @@ const scrim=document.getElementById('scrim'), drawer=document.getElementById('dr
 function segs(id,opts,cur,on){ const el=document.getElementById(id); el.innerHTML=opts.map(o=>`<button aria-pressed="${o===cur}">${esc(o)}</button>`).join("");
   el.querySelectorAll('button').forEach((b,i)=>b.onclick=()=>{on(opts[i]); buildDrawer(); render();}); }
 const SKINS=[["","Auto","Follows your phone: Simple by day, Batman at night","#F2F2F7","#000","#0B7A6C"],
+  ["deck","Artha","Dark 3D deck with moving depth, like Artha","#04070C","#0C141D","#3CF0D4"],
   ["batman","Batman","Black, with a teal edge","#000000","#1C1C1E","#3CCFB8"],
   ["simple","Simple","Clean and light","#F2F2F7","#FFFFFF","#0B7A6C"],
   ["blossom","Blossom","Soft pink and rose","#FFF4F6","#FFFFFF","#D2497C"],
@@ -840,6 +890,7 @@ function applySkin(k){ const r=document.documentElement; if(k) r.setAttribute("d
 function buildSkins(){ const cur=store.get("skin",""), el=document.getElementById('fSkin');
   el.innerHTML=SKINS.map(([k,n,d,bg,sf,t])=>`<button type="button" aria-pressed="${cur===k}" data-k="${k}" title="${d}"><span class="sw" style="--a:${bg};--b:${sf};--t:${t}"></span>${n}</button>`).join("");
   el.querySelectorAll('button').forEach(b=>b.onclick=()=>{ document.documentElement.classList.add('skinning'); store.set("skin",b.dataset.k); applySkin(b.dataset.k); buildSkins(); setTimeout(()=>document.documentElement.classList.remove('skinning'),500); }); }
+if(!store.get("deck26",false)){ store.set("deck26",true); store.set("skin","deck"); }   // 2.6: everyone gets the Artha look once; any other theme can be chosen again in the menu
 applySkin(store.get("skin",""));
 function buildDrawer(){ buildSkins();
   segs('fPaid',["All","Aditya","Choti"],S.paid,v=>{S.paid=v;store.set("paid",v);});
@@ -1057,7 +1108,9 @@ function save(cat,sub,btn){
   // Saved on the phone at once; sent to the sheet in the background (kept and retried if offline).
   OUT.push({kind:ed?"edit":"add",p:payload,at:Date.now()}); saveOut();
   ROWS=withPending(SERVER); closeAdd(); render(); if(!sheet.hidden) doSearch();
-  showToast(`${ed?"Updated":"Saved"} ${inr(amt)} · ${cat}${sub?" ("+sub.replace("House - ","")+")":""}`); flush();
+  const label=cat+(sub?" ("+sub.replace("House - ","")+")":"");
+  if(ed) showToast(`Updated ${inr(amt)} · ${label}`); else saved(amt,label,payload.date);
+  flush();
 }
 
 /* ---------- tap an entry → edit ---------- */
@@ -1119,8 +1172,76 @@ document.addEventListener('click',e=>{ if(Date.now()-swipedAt<400) return;
   document.addEventListener('touchcancel',lpStop,{passive:true});
   document.addEventListener('touchend',()=>{ lpStop(); if(lpDone){ lpDone=false; swipedAt=Date.now(); return; } if(!w) return; if(drag){ const tx=w.querySelector('.tx'); tx.style.transition=''; tx.style.transform=''; w.classList.toggle('open',dx<-W/2); swipedAt=Date.now(); } w=null; },{passive:true});
 })();
+
+/* ---------- 2.6: motion ---------- */
+const still=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+const deck=()=>document.documentElement.getAttribute("data-skin")==="deck";
+/* every tap answers: the control tilts toward the finger and a ring of light spreads from the touch */
+(()=>{ const rip=document.createElement("i"); rip.className="rip"; rip.setAttribute("aria-hidden","true"); document.body.appendChild(rip); let cur=null, t=0;
+  addEventListener("pointerdown",e=>{ if(still()) return; const el=e.target.closest&&e.target.closest("button,a,.card,.tx,.slot,.pill"); if(!el||el.disabled) return;
+    rip.style.left=e.clientX+"px"; rip.style.top=e.clientY+"px"; rip.classList.remove("go"); void rip.offsetWidth; rip.classList.add("go"); BGK.kick(.5);
+    if(el.closest("svg,.txw,.cgrid.sorting")||getComputedStyle(el).transform!=="none") return;   // rows that swipe, tiles being re-ordered and placed items keep their own movement
+    const r=el.getBoundingClientRect(); el.style.setProperty("--tx",(((e.clientX-r.left)/Math.max(1,r.width)-.5)*2).toFixed(2)); el.style.setProperty("--ty",(((e.clientY-r.top)/Math.max(1,r.height)-.5)*2).toFixed(2));
+    el.style.setProperty("--tk",r.width>220?"3":r.width>110?"7":"12");
+    clearTimeout(t); if(cur&&cur!==el) cur.classList.remove("tapd"); cur=el; el.classList.add("tapd"); },{passive:true});
+  const up=()=>{ const el=cur; cur=null; if(el) t=setTimeout(()=>el.classList.remove("tapd"),150); };
+  addEventListener("pointerup",up,{passive:true}); addEventListener("pointercancel",up,{passive:true}); })();
+/* the ring leans with the phone */
+addEventListener("deviceorientation",e=>{ if(e.gamma==null||!deck()||still()) return; const st=document.getElementById("stage");
+  st.style.setProperty("--gx",Math.max(-1,Math.min(1,e.gamma/35)).toFixed(2)); st.style.setProperty("--gy",Math.max(-1,Math.min(1,(e.beta-45)/35)).toFixed(2)); },{passive:true});
+/* numbers roll up to their new value */
+function countUp(el,a,b,ms,fmt){ if(!el) return; if(still()){ el.textContent=fmt(b); return; } const t0=performance.now();
+  const step=now=>{ const k=Math.min(1,(now-t0)/ms), e=1-Math.pow(1-k,3); el.textContent=fmt(a+(b-a)*e); if(k<1&&el.isConnected) requestAnimationFrame(step); }; requestAnimationFrame(step); }
+/* after saving an expense: calm, clear, and never in the way */
+function saved(amt,label,iso){ if(navigator.vibrate) navigator.vibrate([10,40,16]);
+  document.querySelectorAll(".yay").forEach(n=>n.remove());
+  const ym=String(iso||"").slice(0,7), mon=ROWS.filter(r=>r.d&&(r.d.getFullYear()+"-"+String(r.d.getMonth()+1).padStart(2,"0"))===ym).reduce((x,r)=>x+(+r.a||0),0);
+  const y=document.createElement("div"); y.className="yay"; y.setAttribute("role","status");
+  y.innerHTML=`<span class="tick"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="yamt" id="yAmt">${esc(inr(0))}</span><b>${esc(label)}</b><small>This month so far <span id="yMon">${esc(inr(Math.max(0,mon-amt)))}</span></small>`;
+  document.body.appendChild(y);
+  let gone=false; const bye=()=>{ if(gone) return; gone=true; removeEventListener("pointerdown",bye,true); y.classList.add("bye"); setTimeout(()=>y.remove(),360); };
+  setTimeout(bye,2300); setTimeout(()=>{ if(!gone) addEventListener("pointerdown",bye,true); },450);
+  countUp(document.getElementById("yAmt"),0,amt,650,inr); setTimeout(()=>countUp(document.getElementById("yMon"),Math.max(0,mon-amt),mon,800,inr),450);
+  if(!still()){ BGK.kick(2); const st=document.getElementById("stage"); st.classList.remove("swell"); void st.offsetWidth; st.classList.add("swell"); } }
+/* the background of the Artha look: a floor grid running to the horizon and line-art objects drifting at three depths.
+   Plain 2D canvas (no library), about 30 frames a second, asleep whenever the app is hidden, another theme is chosen or motion is off. */
+const BGK=(()=>{ const c=document.getElementById("bgk"), g=c.getContext("2d"); let W=0,H=0,dpr=1,run=false,last=0,boost=0,px=0,py=0,tx=0,ty=0,z0=0;
+  const KIND=["coin","ring","cube","bars","rupee","tri","receipt","ring","coin","cube"], O=Array.from({length:22},(_,i)=>({k:KIND[i%KIND.length],x:(i*0.618)%1,y:(i*0.377+.1)%1,d:.35+((i*7)%10)/10*.9,r:i*1.3,vr:(((i*5)%7)-3)*.05,vx:(((i*3)%5)-2)*.004,vy:(((i*11)%7)-3)*.003,ph:i*1.7}));
+  const S=Array.from({length:70},(_,i)=>({x:(i*0.731)%1,y:(i*0.419)%1,d:.3+((i*13)%10)/10}));
+  const size=()=>{ dpr=Math.min(1.5,devicePixelRatio||1); W=innerWidth; H=innerHeight; c.width=W*dpr; c.height=H*dpr; g.setTransform(dpr,0,0,dpr,0,0); };
+  const tint=()=>getComputedStyle(document.documentElement).getPropertyValue("--tint").trim()||"#3CF0D4";
+  function shape(o,s){ g.beginPath();
+    if(o.k==="coin"){ g.ellipse(0,0,s,s*.42,0,0,6.283); g.moveTo(-s,0); g.lineTo(-s,s*.3); g.ellipse(0,s*.3,s,s*.42,0,3.1416,0,true); g.lineTo(s,0); }
+    else if(o.k==="ring"){ g.arc(0,0,s,0,6.283); g.moveTo(s*.6,0); g.arc(0,0,s*.6,0,6.283); }
+    else if(o.k==="cube"){ const a=s*.8; g.rect(-a,-a,a*1.6,a*1.6); g.moveTo(-a,-a); g.lineTo(-a*.4,-a*1.5); g.lineTo(a*1.2,-a*1.5); g.lineTo(a*.6,-a); g.moveTo(a*1.2,-a*1.5); g.lineTo(a*1.2,a*.1); g.lineTo(a*.6,a*.6); }
+    else if(o.k==="bars"){ [.5,.9,.7,1.25].forEach((h,i)=>g.rect(-s+i*s*.55,s-h*s*1.4,s*.34,h*s*1.4)); }
+    else if(o.k==="rupee"){ g.arc(0,0,s,0,6.283); g.moveTo(-s*.4,-s*.5); g.lineTo(s*.42,-s*.5); g.moveTo(-s*.4,-s*.2); g.lineTo(s*.42,-s*.2); g.moveTo(-s*.25,-s*.5); g.bezierCurveTo(s*.5,-s*.5,s*.5,s*.1,-s*.25,s*.1); g.lineTo(s*.3,s*.6); }
+    else if(o.k==="tri"){ g.moveTo(0,-s); g.lineTo(s*.95,s*.7); g.lineTo(-s*.95,s*.7); g.closePath(); }
+    else { g.rect(-s*.6,-s,s*1.2,s*2); g.moveTo(-s*.3,-s*.5); g.lineTo(s*.3,-s*.5); g.moveTo(-s*.3,-s*.1); g.lineTo(s*.3,-s*.1); g.moveTo(-s*.3,s*.3); g.lineTo(s*.1,s*.3); }
+    g.stroke(); }
+  function frame(now){ if(!run) return; requestAnimationFrame(frame); if(now-last<32) return; const dt=Math.min(.06,(now-last)/1000); last=now;
+    boost*=Math.pow(.03,dt); if(boost<.004) boost=0; px+=(tx-px)*.05; py+=(ty-py)*.05; const col=tint();
+    g.clearRect(0,0,W,H); g.strokeStyle=col; g.fillStyle=col; g.lineJoin="round"; g.lineCap="round";
+    /* floor grid */
+    const hz=H*.56, vx=W/2+px*26; z0=(z0+dt*(.22+boost*1.6))%1; g.lineWidth=1; g.globalAlpha=.13+Math.min(.12,boost*.08);
+    g.beginPath(); for(let i=-9;i<=9;i++){ g.moveTo(vx+i*14,hz); g.lineTo(vx+i*W*.42,H+10); }
+    for(let k=0;k<9;k++){ const t=(k+z0)/9, y=hz+(H-hz)*t*t; g.moveTo(0,y); g.lineTo(W,y); } g.stroke();
+    /* stars */
+    S.forEach(s=>{ g.globalAlpha=.25+.45*s.d; const x=(s.x*W+px*18*s.d+W)%W, y=s.y*hz*1.05; g.fillRect(x,y,1.4*s.d,1.4*s.d); });
+    /* objects, far to near */
+    O.forEach(o=>{ o.x=(o.x+o.vx*dt*(1+boost*3)+1)%1; o.y=(o.y+o.vy*dt+1)%1; o.r+=o.vr*dt;
+      const s=(9+o.d*13), x=o.x*(W+80)-40+px*34*o.d, y=o.y*(H*.9)+Math.sin(now/2400+o.ph)*5-py*20*o.d;
+      g.save(); g.translate(x,y); g.rotate(o.r); g.globalAlpha=(.10+.13*o.d)*(1+Math.min(.8,boost*.5)); g.lineWidth=1+o.d*.8; shape(o,s); g.restore(); });
+    g.globalAlpha=1; }
+  const wake=()=>{ const on=deck()&&!still()&&!document.hidden; if(on&&!run){ run=true; size(); last=0; requestAnimationFrame(frame); } else if(!on&&run){ run=false; g.clearRect(0,0,W,H); } };
+  addEventListener("resize",()=>{ if(run) size(); }); document.addEventListener("visibilitychange",wake);
+  new MutationObserver(wake).observe(document.documentElement,{attributes:true,attributeFilter:["data-skin"]});
+  addEventListener("pointerdown",e=>{ tx=(e.clientX/innerWidth-.5)*2; ty=(e.clientY/innerHeight-.5)*2; },{passive:true});
+  addEventListener("deviceorientation",e=>{ if(e.gamma!=null){ tx=Math.max(-1,Math.min(1,e.gamma/35)); ty=Math.max(-1,Math.min(1,(e.beta-45)/35)); } },{passive:true});
+  wake();
+  return {kick(k){ boost=Math.min(2.4,boost+k); },wake,on:()=>run}; })();
 /* updates: a banner when a new version is published */
-const APP_VERSION="2.5";
+const APP_VERSION="2.6";
 document.getElementById('verTxt').textContent="Version "+APP_VERSION;
 /* update card: never pops over an open sheet, the add screen or while typing; waits until you're back on the main screen */
 let UPD=null, updT=0; const $u=id=>document.getElementById(id);
