@@ -1,0 +1,20 @@
+# Every push is checked by tools/check.py (files not empty, versions agree, scripts parse, the app starts and works offline).
+# A red cross on a commit means that version must not be used: fix it and push again.
+name: Release check
+on:
+  push: { branches: [main] }
+  pull_request: {}
+  workflow_dispatch: {}
+permissions: { contents: read }
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: pip install playwright==1.48.0 && python -m playwright install --with-deps chromium
+      - name: Release check
+        run: CHROME="$(python -c 'from playwright.sync_api import sync_playwright as s; p=s().start(); print(p.chromium.executable_path); p.stop()')" python tools/check.py
