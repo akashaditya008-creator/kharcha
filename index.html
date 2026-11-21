@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JDgtvwqonQSJcprhWAkzWZXJ9vykRf2wa9Jgqc1UMqw=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-JYHGQ69+gltqgjt5UeheHDzdgwUPTgTlcwXwCMaexsI=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JDgtvwqonQSJcprhWAkzWZXJ9vykRf2wa9Jgqc1UMqw=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-srFawqMubM0wj2HShVaPgtJZgwd0XW7avDXm/SChkO0=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>try{var s=JSON.parse(localStorage.getItem("acx:skin")||"\"\"");if(!localStorage.getItem("acx:deck26"))s="deck";if(s)document.documentElement.setAttribute("data-skin",s);}catch(e){}
 /* the font is fetched without holding up the first paint (the phone font shows until it arrives) */
@@ -1578,8 +1578,12 @@ function saved(amt,label,iso){ if(navigator.vibrate) navigator.vibrate([10,40,16
 /* the background of the Artha look: a floor grid running to the horizon and line-art objects drifting at three depths.
    Plain 2D canvas (no library), about 30 frames a second, asleep whenever the app is hidden, another theme is chosen or motion is off. */
 const BGK=(()=>{ const c=document.getElementById("bgk"), g=c.getContext("2d"); let W=0,H=0,dpr=1,run=false,last=0,boost=0,px=0,py=0,tx=0,ty=0,z0=0;
-  const KIND=["coin","ring","cube","bars","rupee","tri","receipt","ring","coin","cube"], O=Array.from({length:22},(_,i)=>({k:KIND[i%KIND.length],x:(i*0.618)%1,y:(i*0.377+.1)%1,d:.35+((i*7)%10)/10*.9,r:i*1.3,vr:(((i*5)%7)-3)*.05,vx:(((i*3)%5)-2)*.004,vy:(((i*11)%7)-3)*.003,ph:i*1.7}));
-  const S=Array.from({length:70},(_,i)=>({x:(i*0.731)%1,y:(i*0.419)%1,d:.3+((i*13)%10)/10}));
+  /* objects start scattered at random (one per cell of a shuffled 5×5 grid, jittered, so they never line up or bunch), each drifting its own way on a slowly turning heading */
+  const KIND=["coin","ring","cube","bars","rupee","tri","receipt","ring","coin","cube"], rnd=Math.random;
+  const cells=Array.from({length:25},(_,i)=>i).sort(()=>rnd()-.5);
+  const O=Array.from({length:22},(_,i)=>({k:KIND[Math.floor(rnd()*KIND.length)],x:((cells[i]%5)+.15+rnd()*.7)/5,y:((Math.floor(cells[i]/5))+.15+rnd()*.7)/5,d:.35+rnd()*.9,r:rnd()*6.283,vr:(rnd()-.5)*.35,
+    ang:rnd()*6.283,sp:.008+rnd()*.016,turn:(rnd()-.5)*.5,ph:rnd()*6.283}));
+  const S=Array.from({length:70},()=>({x:rnd(),y:rnd(),d:.3+rnd()*.7}));
   const size=()=>{ dpr=Math.min(1.5,devicePixelRatio||1); W=innerWidth; H=innerHeight; c.width=W*dpr; c.height=H*dpr; g.setTransform(dpr,0,0,dpr,0,0); };
   let TINT="#3CF0D4", fr=0, covered=false;   /* colour read once per theme change, not every frame */
   const tint=()=>TINT;
@@ -1603,7 +1607,8 @@ const BGK=(()=>{ const c=document.getElementById("bgk"), g=c.getContext("2d"); l
     /* stars */
     S.forEach(s=>{ g.globalAlpha=.25+.45*s.d; const x=(s.x*W+px*18*s.d+W)%W, y=s.y*hz*1.05; g.fillRect(x,y,1.4*s.d,1.4*s.d); });
     /* objects, far to near */
-    O.forEach(o=>{ o.x=(o.x+o.vx*dt*(1+boost*3)+1)%1; o.y=(o.y+o.vy*dt+1)%1; o.r+=o.vr*dt;
+    O.forEach(o=>{ o.ang+=(o.turn+Math.sin(now/4200+o.ph)*.35)*dt; const v=o.sp*dt*(1+boost*3);   /* free-flowing: heading wanders, wraps at the edges */
+      const wr=u=>((u+.05)%1.1+1.1)%1.1-.05; o.x=wr(o.x+Math.cos(o.ang)*v); o.y=wr(o.y+Math.sin(o.ang)*v*.8); o.r+=o.vr*dt;
       const s=(9+o.d*13), x=o.x*(W+80)-40+px*34*o.d, y=o.y*(H*.9)+Math.sin(now/2400+o.ph)*5-py*20*o.d;
       g.save(); g.translate(x,y); g.rotate(o.r); g.globalAlpha=(.24+.26*o.d)*(1+Math.min(.6,boost*.4)); g.lineWidth=1.3+o.d*.9; shape(o,s); g.restore(); });
     g.globalAlpha=1; }
