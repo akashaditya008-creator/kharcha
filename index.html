@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JDgtvwqonQSJcprhWAkzWZXJ9vykRf2wa9Jgqc1UMqw=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-nq1M2hxeZQaS1cV0ORDkM//xBprEXj9ZwmSqfWZd/xs=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JDgtvwqonQSJcprhWAkzWZXJ9vykRf2wa9Jgqc1UMqw=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-979NXszx4sDfNf+XX6pZHVF7CUTlSECY4TzDMQ2KCKE=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>try{var s=JSON.parse(localStorage.getItem("acx:skin")||"\"\"");if(!localStorage.getItem("acx:deck26"))s="deck";if(s)document.documentElement.setAttribute("data-skin",s);}catch(e){}
 /* the font is fetched without holding up the first paint (the phone font shows until it arrives) */
@@ -668,8 +668,14 @@ body.dopen{overflow:hidden}
 :root[data-skin="deck"] .day{background:rgba(10,18,27,.86)}
 :root[data-skin="deck"] .txw,:root[data-skin="deck"] .tx{background:#0B141D}
 :root[data-skin="deck"] .dh{background:#0E1923}
-:root[data-skin="deck"] .stage svg{transform:none!important;filter:drop-shadow(0 0 14px color-mix(in srgb,var(--tint) 16%,transparent))}
-:root[data-skin="deck"] .stage svg.sel{filter:none}
+/* 3D Space ring: tilted back in depth while you look; it turns to face you the moment you touch it, so the slice under your finger is exact.
+   The glow is a plain gradient behind it (the old drop-shadow filters were redrawn on every touch and made it lag). */
+:root[data-skin="deck"] .stage{perspective:900px}
+:root[data-skin="deck"] .stage::before{content:"";position:absolute;left:50%;top:50%;width:78%;aspect-ratio:1;max-width:280px;transform:translate(-50%,-46%);border-radius:50%;
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--tint) 20%,transparent),transparent 72%);pointer-events:none}
+:root[data-skin="deck"] .stage svg{position:relative;filter:none!important;transform:rotateX(16deg)!important;transform-origin:50% 55%;transition:transform .45s var(--ease)!important}
+:root[data-skin="deck"] .stage svg.sel,:root[data-skin="deck"] .stage svg.touch{transform:none!important}
+:root.calm .stage svg{transform:none!important}
 :root[data-skin="deck"] .csheet,:root[data-skin="deck"] .add,:root[data-skin="deck"] .sheet{background:rgba(4,7,12,.985)}
 :root[data-skin="deck"] .chd{background:rgba(5,9,15,.9)}
 :root[data-skin="deck"] .drawer{background:rgba(5,9,15,.97)}
@@ -1003,10 +1009,10 @@ function wireRing(svg){ let down=false, raf=0, last=null;
     const i=HOME.sl.findIndex(g=>ang>=g.a0&&ang<g.a1); return i<0?null:i; };
   const move=e=>{ last=e; if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; const i=pick(last); if(i!=null&&i!==HOME.sel){ showCenter(i); try{navigator.vibrate&&navigator.vibrate(4);}catch(_){} } }); };
   svg.addEventListener('pointerdown',e=>{ const {d}=at(e), i=pick(e);
-    if(i!=null){ down=true; try{svg.setPointerCapture(e.pointerId);}catch(_){} showCenter(i); e.preventDefault(); }
+    if(i!=null){ down=true; svg.classList.add('touch'); try{svg.setPointerCapture(e.pointerId);}catch(_){} showCenter(i); e.preventDefault(); }
     else if(d>=RG.r-RG.w/2-16){ showCenter(-1); } });
   svg.addEventListener('pointermove',e=>{ if(down||e.pointerType==="mouse") move(e); });
-  const up=()=>{ down=false; }; svg.addEventListener('pointerup',up); svg.addEventListener('pointercancel',up);
+  const up=()=>{ down=false; svg.classList.remove('touch'); }; svg.addEventListener('pointerup',up); svg.addEventListener('pointercancel',up);
   const cb=document.getElementById('ctrBtn');
   svg.addEventListener('pointerleave',e=>{ if(e.pointerType==="mouse"&&!down&&e.relatedTarget!==cb) showCenter(-1); });
   cb.addEventListener('pointerleave',e=>{ if(e.pointerType==="mouse"&&e.relatedTarget!==svg&&!svg.contains(e.relatedTarget)) showCenter(-1); });
