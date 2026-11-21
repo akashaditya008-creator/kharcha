@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JDgtvwqonQSJcprhWAkzWZXJ9vykRf2wa9Jgqc1UMqw=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-979NXszx4sDfNf+XX6pZHVF7CUTlSECY4TzDMQ2KCKE=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JDgtvwqonQSJcprhWAkzWZXJ9vykRf2wa9Jgqc1UMqw=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-JYHGQ69+gltqgjt5UeheHDzdgwUPTgTlcwXwCMaexsI=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>try{var s=JSON.parse(localStorage.getItem("acx:skin")||"\"\"");if(!localStorage.getItem("acx:deck26"))s="deck";if(s)document.documentElement.setAttribute("data-skin",s);}catch(e){}
 /* the font is fetched without holding up the first paint (the phone font shows until it arrives) */
@@ -520,7 +520,7 @@ body::before{background:var(--bar)}
 /* ring */
 .ringc{padding:10px 12px 6px}
 .stage{position:relative}
-.stage svg{display:block;width:100%;max-width:300px;margin:0 auto;touch-action:none;cursor:pointer;overflow:visible}
+.stage svg{display:block;width:100%;max-width:300px;margin:0 auto;touch-action:pan-y;cursor:pointer;overflow:visible}
 .stage .seg{transition:opacity .22s ease,stroke-width .22s cubic-bezier(.34,1.56,.64,1)}
 .stage svg.sel .seg{opacity:.22}
 .stage svg.sel .seg.on{opacity:1;stroke-width:42}
@@ -545,7 +545,7 @@ body::before{background:var(--bar)}
 .lbar i{display:block;height:100%;border-radius:2px;background:var(--cc)}
 .lmore{width:100%;padding:12px;margin-top:4px;border-radius:12px;font:600 14px var(--body);color:var(--tint);background:color-mix(in srgb,var(--tint) 9%,transparent)}
 /* spending over time */
-svg.bars{display:block;width:100%;height:auto;touch-action:none;cursor:pointer}
+svg.bars{display:block;width:100%;height:auto;touch-action:pan-y;cursor:pointer}
 svg.bars rect.b{fill:color-mix(in srgb,var(--tint) 75%,transparent);transition:opacity .15s}
 svg.bars rect.b.now{fill:var(--tint)} svg.bars rect.b.ghost{fill:var(--track)}
 svg.bars.sel rect.b{opacity:.35} svg.bars.sel rect.b.on{opacity:1;fill:var(--tint)}
@@ -673,8 +673,8 @@ body.dopen{overflow:hidden}
 :root[data-skin="deck"] .stage{perspective:900px}
 :root[data-skin="deck"] .stage::before{content:"";position:absolute;left:50%;top:50%;width:78%;aspect-ratio:1;max-width:280px;transform:translate(-50%,-46%);border-radius:50%;
   background:radial-gradient(closest-side,color-mix(in srgb,var(--tint) 20%,transparent),transparent 72%);pointer-events:none}
-:root[data-skin="deck"] .stage svg{position:relative;filter:none!important;transform:rotateX(16deg)!important;transform-origin:50% 55%;transition:transform .45s var(--ease)!important}
-:root[data-skin="deck"] .stage svg.sel,:root[data-skin="deck"] .stage svg.touch{transform:none!important}
+:root[data-skin="deck"] .stage svg{position:relative;filter:none!important;transform:rotateX(calc(20deg + var(--gy,0)*6deg)) rotateY(calc(var(--gx,0)*8deg))!important;transform-origin:50% 55%;transition:transform .5s var(--ease)!important;will-change:transform}
+
 :root.calm .stage svg{transform:none!important}
 :root[data-skin="deck"] .csheet,:root[data-skin="deck"] .add,:root[data-skin="deck"] .sheet{background:rgba(4,7,12,.985)}
 :root[data-skin="deck"] .chd{background:rgba(5,9,15,.9)}
@@ -690,6 +690,28 @@ body.dopen{overflow:hidden}
   .ledger.in,#home.in{animation:slidein .38s var(--ease)}
 }
 @media (prefers-reduced-motion:reduce){ .drawer,.app,.dock,.stage .seg{transition:none} }
+
+/* ================= 2.8 ================= */
+.period{display:flex;justify-content:center;padding-block:10px 0}
+.period .cur{padding:6px 14px;border-radius:999px}
+.ptr.busy{opacity:1;transform:translateY(18px)} .ptr.busy svg{animation:sp .8s linear infinite}
+#dSync{min-width:0}
+.stack{display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px;margin:2px 0 10px}
+.stack i{display:block;height:100%;min-width:3px}
+.where{display:grid}
+.wrow{display:grid;grid-template-columns:10px 1fr auto 40px;align-items:center;gap:10px;width:100%;padding:9px 6px;border-radius:10px;text-align:left;font-size:14px}
+.wrow+.wrow{border-top:.5px solid var(--line)}
+.wrow>i{width:10px;height:10px;border-radius:3px}
+.wn{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}.wn small{color:var(--muted);font-weight:400}
+.wrow b{font:600 14px var(--display)} .wrow>small{color:var(--muted);font-size:12px;text-align:right}
+.wrow[aria-pressed="true"]{background:color-mix(in srgb,var(--tint) 14%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--tint) 45%,transparent)}
+.hist{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:6px}
+.hist button{display:grid;justify-items:center;gap:3px;padding:8px 2px 7px;border-radius:12px;background:var(--chip);min-width:0}
+.hist .hb{display:flex;align-items:flex-end;width:10px;height:34px;border-radius:5px;background:var(--track);overflow:hidden}
+.hist .hb i{display:block;width:100%;border-radius:5px;background:var(--cc,var(--tint))}
+.hist b{font:600 12.5px var(--display)} .hist small{font-size:11px;color:var(--muted);white-space:nowrap}
+.hist button.cur{background:color-mix(in srgb,var(--tint) 16%,transparent);box-shadow:inset 0 0 0 1.5px var(--tint)}
+.kpis b.up{color:var(--spend)} .kpis b.down{color:var(--ok)}
 </style>
 
 <canvas id="bgk" aria-hidden="true"></canvas>
@@ -704,12 +726,9 @@ body.dopen{overflow:hidden}
   </header>
 
   <div class="period">
-    <button class="prev" id="prevBtn" aria-label="Previous period"></button>
     <button class="cur" id="curBtn" aria-label="Change period"></button>
-    <button class="next" id="nextBtn" aria-label="Next period"></button>
   </div>
-  <div class="pseg" id="pseg" role="group" aria-label="Period"></div>
-  <button class="sync" id="sync" role="status" type="button" aria-label="Sync status, tap to sync now"><span class="dot"></span><span id="syncTxt">Loading your sheet…</span></button>
+  <button class="sync" id="sync" role="status" type="button" hidden aria-label="Sync status, tap to sync now"><span class="dot"></span><span id="syncTxt">Loading your sheet…</span></button>
 
   <main>
     <div class="pill-row">
@@ -745,6 +764,7 @@ body.dopen{overflow:hidden}
     <div id="intervalBox" hidden><div class="dates"><input type="date" id="ivFrom" aria-label="From"><input type="date" id="ivTo" aria-label="To"></div></div>
     <label class="jump"><span>Jump to a date</span><input type="date" id="pickDate"></label></section>
   <section class="dsec" style="--sc:#A78BFA"><h3><span class="di"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 1.8-.8 1.8-1.7 0-1.4-1.3-1.6-1.3-2.9 0-1 .8-1.6 1.8-1.6H17a4 4 0 0 0 4-4C21 6.4 17 3 12 3z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7" r="1"/><circle cx="15" cy="7.5" r="1"/></svg></span>Theme</h3><div class="skins" id="fSkin"></div></section>
+  <div class="ver"><span id="dSync"></span><button type="button" id="dSyncBtn">Sync now</button></div>
   <div class="ver"><button type="button" id="meBtn"></button></div>
   <div class="ver"><span id="verTxt"></span><button type="button" id="verBtn">Check for updates</button></div>
 </aside>
@@ -1005,14 +1025,18 @@ function showCenter(i){ const g=HOME.sl[i], st=document.getElementById('stage'),
 function wireRing(svg){ let down=false, raf=0, last=null;
   const at=e=>{ const r=svg.getBoundingClientRect(), x=(e.clientX-r.left)*300/r.width-RG.cx, y=(e.clientY-r.top)*300/r.height-RG.cy;
     return {d:Math.hypot(x,y), ang:(Math.atan2(x,-y)*180/Math.PI+360)%360}; };
-  const pick=e=>{ const {d,ang}=at(e); if(d<RG.r-RG.w/2-16||d>RG.r+RG.w/2+22) return null;
+  /* the browser finds the slice under the finger exactly, tilt and lean included; the angle maths only fills the hair-thin gaps */
+  const pick=e=>{ const n=document.elementFromPoint(e.clientX,e.clientY); if(n&&n.classList&&n.classList.contains('seg')) return +n.dataset.i;
+    if(n&&n!==svg&&!svg.contains(n)) return null; const {d,ang}=at(e); if(d<RG.r-RG.w/2-12||d>RG.r+RG.w/2+16) return null;
     const i=HOME.sl.findIndex(g=>ang>=g.a0&&ang<g.a1); return i<0?null:i; };
+  /* a touch that lands on the ring is kept for sliding round it; anywhere else on the chart the page scrolls / swipes as usual */
+  svg.addEventListener('touchstart',e=>{ const t=e.touches[0]; if(e.touches.length===1&&pick(t)!=null){ RINGTOUCH=true; e.preventDefault(); } },{passive:false});
   const move=e=>{ last=e; if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; const i=pick(last); if(i!=null&&i!==HOME.sel){ showCenter(i); try{navigator.vibrate&&navigator.vibrate(4);}catch(_){} } }); };
   svg.addEventListener('pointerdown',e=>{ const {d}=at(e), i=pick(e);
-    if(i!=null){ down=true; svg.classList.add('touch'); try{svg.setPointerCapture(e.pointerId);}catch(_){} showCenter(i); e.preventDefault(); }
+    if(i!=null){ down=true; try{svg.setPointerCapture(e.pointerId);}catch(_){} showCenter(i); e.preventDefault(); }
     else if(d>=RG.r-RG.w/2-16){ showCenter(-1); } });
   svg.addEventListener('pointermove',e=>{ if(down||e.pointerType==="mouse") move(e); });
-  const up=()=>{ down=false; svg.classList.remove('touch'); }; svg.addEventListener('pointerup',up); svg.addEventListener('pointercancel',up);
+  const up=()=>{ down=false; }; svg.addEventListener('pointerup',up); svg.addEventListener('pointercancel',up);
   const cb=document.getElementById('ctrBtn');
   svg.addEventListener('pointerleave',e=>{ if(e.pointerType==="mouse"&&!down&&e.relatedTarget!==cb) showCenter(-1); });
   cb.addEventListener('pointerleave',e=>{ if(e.pointerType==="mouse"&&e.relatedTarget!==svg&&!svg.contains(e.relatedTarget)) showCenter(-1); });
@@ -1037,7 +1061,7 @@ function bName(b,short){ const d=b.s;
   if(b.unit==="week"){ const l=addD(b.e,-1); return `${d.getDate()} ${MON[d.getMonth()]} – ${l.getDate()} ${MON[l.getMonth()]}`; }
   if(b.unit==="month") return short?MON[d.getMonth()]:`${MONL[d.getMonth()]} ${d.getFullYear()}`; return String(d.getFullYear()); }
 function drawTrend(el,rows,o){ o=o||{}; const B=buckets(rows,S.mode,S.anchor);
-  if(!B||B.length<2){ el.innerHTML=""; el.hidden=true; return; } el.hidden=false;
+  if(!B||B.length<2||!rows.length){ el.innerHTML=""; el.hidden=true; return; } el.hidden=false;
   const W=340,H=o.small?96:128,pt=14,pb=18, n=B.length, max=Math.max(1,...B.map(b=>b.sum)), unit=B[0].unit;
   const t0=today(), past=B.filter(b=>b.s<=t0), avg=past.length?sumA(rows)/past.length:0;
   const sw=W/n, bw=Math.max(2,Math.min(22,sw*.62)), Y=v=>pt+(1-v/max)*(H-pt-pb), every=Math.ceil(n/7);
@@ -1110,21 +1134,52 @@ function drawLedger(rows){
 }
 
 /* ---------- one category: its own screen (slides in), entries by day ---------- */
-const cSheet=document.getElementById('cSheet'), cBody=document.getElementById('cBody'); let CAT=null, CSUB="", CDAYS=40;
-function openCat(c){ CAT=c; CSUB=""; CDAYS=40; drawCat(); cSheet.hidden=false; cBody.scrollTop=0; ovOpen(hideCat); }
+const cSheet=document.getElementById('cSheet'), cBody=document.getElementById('cBody'); let CAT=null, CSUB="", CNOTE="", CDAYS=40;
+function openCat(c){ CAT=c; CSUB=""; CNOTE=""; CDAYS=40; drawCat(); cSheet.hidden=false; cBody.scrollTop=0; ovOpen(hideCat); }
 const hideCat=()=>{ cSheet.hidden=true; CAT=null; };
-function drawCat(){ if(!CAT) return; const all=filtered().filter(r=>r.c===CAT), rows=CSUB?all.filter(r=>r.s===CSUB):all, col=catMeta(CAT)[1];
-  const total=sumA(rows), whole=sumA(filtered()), n=rows.length;
+const inrK=n=>n>=1e5?"₹"+(n/1e5).toFixed(n>=1e6?0:1).replace(/\.0$/,"")+"L":n>=1e3?"₹"+(n/1e3).toFixed(n>=1e4?0:1).replace(/\.0$/,"")+"k":inr(n);
+const noteKey=r=>(r.n||"").trim().replace(/\s+/g," ").toLowerCase();
+/* what the money in this category went on: entries grouped by their note (Rent, Zepto veggies, Maid…), biggest first */
+function whereItems(rows,col){ const m=new Map(); for(const r of rows){ const k=noteKey(r)||"~none~"; const g=m.get(k)||{k,sum:0,n:0,names:new Map()}; g.sum+=r.a; g.n++; const nm=(r.n||"").trim().replace(/\s+/g," "); g.names.set(nm,(g.names.get(nm)||0)+1); m.set(k,g); }
+  const G=[...m.values()].sort((a,b)=>b.sum-a.sum);
+  G.forEach(g=>{ g.name=g.k==="~none~"?"No note":[...g.names.entries()].sort((a,b)=>b[1]-a[1])[0][0]; });
+  const top=G.length>7?G.slice(0,6):G, rest=G.length>7?G.slice(6):[], tone=i=>`color-mix(in srgb,${col} ${Math.max(22,100-i*17)}%,var(--surface))`;
+  const items=top.map((g,i)=>({key:g.k,name:g.name,sum:g.sum,n:g.n,c:tone(i)})); if(rest.length) items.push({key:"~rest~",name:`Everything else (${rest.length})`,sum:sumA(rest.map(g=>({a:g.sum}))),n:rest.reduce((x,g)=>x+g.n,0),c:"var(--track)"});
+  return items; }
+function whereHTML(items,total){ if(!total||!items.length) return ""; return `<div class="gch"><h3>Where it went</h3><span class="muted">tap one to see only those</span></div><div class="stack">${items.map(it=>`<i style="width:${Math.max(1.5,it.sum/total*100)}%;background:${it.c}"></i>`).join("")}</div>
+    <div class="where">${items.map(it=>`<button type="button" class="wrow" data-k="${esc(it.key)}" aria-pressed="${CNOTE===it.key}"><i style="background:${it.c}"></i><span class="wn">${esc(it.name)}${it.n>1?` <small>× ${it.n}</small>`:""}</span><b class="num">${inr(it.sum)}</b><small class="num">${pctTxt(it.sum,total)}</small></button>`).join("")}</div>`;
+}
+/* the same category over the last few days / weeks / months / years: one chip each, tap to go there */
+function histHTML(){ if(S.mode==="interval") return ""; const unit=S.mode==="all"?"year":S.mode, N={day:7,week:6,month:6,year:5}[unit]; const base=filtered(false).filter(r=>r.c===CAT&&(!CSUB||r.s===CSUB));
+  let anchors=[]; if(S.mode==="all"){ const ys=[...new Set(base.map(r=>r.d.getFullYear()))].sort(); anchors=ys.slice(-6).map(y=>new Date(y,0,1)); }
+  else { let a=S.anchor; for(let i=0;i<N;i++){ anchors.unshift(a); a=shift(unit,a,-1); } }
+  if(anchors.length<2) return "";
+  const P=anchors.map(a=>{ const [s0,e0]=range(unit,a); return {a,sum:sumA(base.filter(r=>r.d>=s0&&r.d<e0)),cur:S.mode!=="all"&&+a===+S.anchor}; }), max=Math.max(1,...P.map(p=>p.sum));
+  const lab=a=>unit==="day"?`${DOW[a.getDay()]} ${a.getDate()}`:unit==="week"?`${range("week",a)[0].getDate()} ${MON[range("week",a)[0].getMonth()]}`:unit==="month"?`${MON[a.getMonth()]}${a.getMonth()===0?" "+String(a.getFullYear()).slice(2):""}`:String(a.getFullYear());
+  const nm={day:"day",week:"week",month:"month",year:"year"}[unit];
+  return `<div class="gch"><h3>${S.mode==="all"?"By year":"Last "+P.length+" "+nm+"s"}</h3><span class="muted">tap one to go there</span></div><div class="hist">${P.map((p,i)=>`<button type="button" data-i="${i}" class="${p.cur?"cur":""}"><span class="hb"><i style="height:${p.sum?Math.max(8,p.sum/max*100):0}%"></i></span><b class="num">${p.sum?inrK(p.sum):"—"}</b><small>${esc(lab(p.a))}</small></button>`).join("")}</div>`;
+}
+function catVsPrev(total){ if(S.mode==="all") return ""; let s0,e0; if(S.mode==="interval"){ const [a,b]=range("interval"); s0=new Date(a-(b-a)); e0=a; } else [s0,e0]=range(S.mode,shift(S.mode,S.anchor,-1));
+  const p=sumA(filtered(false).filter(r=>r.c===CAT&&(!CSUB||r.s===CSUB)&&r.d>=s0&&r.d<e0)); if(!p&&!total) return "<b class=\"num\">—</b>";
+  if(!p) return `<b class="num up">New</b>`; const d=Math.round((total-p)/p*100); return `<b class="num ${d>0?"up":d<0?"down":""}">${d>0?"▲":d<0?"▼":"="} ${Math.abs(d)}%</b>`; }
+function drawCat(){ if(!CAT) return; const all=filtered().filter(r=>r.c===CAT), bySub=CSUB?all.filter(r=>r.s===CSUB):all, col=catMeta(CAT)[1];
+  const rows=CNOTE&&CNOTE!=="~rest~"?bySub.filter(r=>(noteKey(r)||"~none~")===CNOTE):bySub;
+  const total=sumA(bySub), whole=sumA(filtered()), n=bySub.length;
   document.getElementById('cIc').innerHTML=icon(CAT,col); document.getElementById('cIc').style.setProperty('--cc',col);
   document.getElementById('cTitle').textContent=CAT; document.getElementById('cSubT').textContent=label(S.mode,S.anchor)+(S.paid!=="All"?" · paid by "+S.paid:"");
   const subs=[...new Set(all.map(r=>r.s).filter(Boolean))];
   let h=`<div class="gc sum" style="--cc:${col}"><div class="sumt"><div><small>Spent on ${esc(CAT)}${CSUB?" · "+esc(CSUB.replace("House - ","")):""}</small><b class="num" style="color:${col}">${inr(total)}</b></div></div>
-    <div class="kpis"><span><b class="num">${n}</b><small>${n===1?"entry":"entries"}</small></span><span><b class="num">${pctTxt(total,whole)}</b><small>of all spending</small></span><span><b class="num">${inr(n?total/n:0)}</b><small>per entry</small></span></div></div>`;
+    <div class="kpis"><span><b class="num">${n}</b><small>${n===1?"entry":"entries"}</small></span><span><b class="num">${pctTxt(total,whole)}</b><small>of all spending</small></span><span>${catVsPrev(total)}<small>vs ${esc(prevName())}</small></span></div></div>`;
   if(subs.length) h+=`<div class="lseg subs"><button type="button" data-s="" aria-pressed="${!CSUB}">All <small class="num">${inr(sumA(all))}</small></button>${subs.map(sb=>`<button type="button" data-s="${esc(sb)}" aria-pressed="${CSUB===sb}">${esc(sb.replace("House - ",""))} <small class="num">${inr(sumA(all.filter(r=>r.s===sb)))}</small></button>`).join("")}</div>`;
-  h+=`<div class="gc" id="cTrend"></div><div class="days">${n?daysHTML(rows,false,CDAYS,"cMore"):`<div class="empty">Nothing here in ${esc(label(S.mode,S.anchor))}.</div>`}</div>`;
+  const items=whereItems(bySub,col), topK=new Set(items.map(x=>x.key)), wh=n?whereHTML(items,total):"", hi=histHTML();
+  if(wh) h+=`<div class="gc">${wh}</div>`; if(hi) h+=`<div class="gc" style="--cc:${col}">${hi}</div>`;
+  const list=CNOTE==="~rest~"?bySub.filter(r=>!topK.has(noteKey(r)||"~none~")):rows;   /* "Everything else": the smaller groups' entries */
+  h+=`<div class="days">${list.length?daysHTML(list,false,CDAYS,"cMore"):`<div class="gc"><div class="empty">Nothing here in ${esc(label(S.mode,S.anchor))}.</div></div>`}</div>`;
   cBody.innerHTML=h;
-  drawTrend(document.getElementById('cTrend'),rows,{small:true,id:"ct",onBar:b=>{ const iso=isoDay(b.s); const d=[...cBody.querySelectorAll('.day')].find(x=>x.dataset.iso>=iso&&x.dataset.iso<isoDay(b.e)); if(d) d.scrollIntoView({block:"start",behavior:"smooth"}); }});
-  cBody.querySelectorAll('.subs button').forEach(b=>b.onclick=()=>{ CSUB=b.dataset.s; drawCat(); });
+  cBody.querySelectorAll('.subs button').forEach(b=>b.onclick=()=>{ CSUB=b.dataset.s; CNOTE=""; drawCat(); });
+  cBody.querySelectorAll('.wrow').forEach(b=>b.onclick=()=>{ CNOTE=CNOTE===b.dataset.k?"":b.dataset.k; const y=cBody.scrollTop; drawCat(); cBody.scrollTop=y; });
+  cBody.querySelectorAll('.hist button').forEach(b=>b.onclick=()=>{ const anchors=[]; if(S.mode==="all"){ const P=[...cBody.querySelectorAll('.hist small')].map(x=>+x.textContent); S.mode="year"; store.set("mode","year"); S.anchor=new Date(P[+b.dataset.i],0,1); }
+    else { let a=S.anchor; const N=cBody.querySelectorAll('.hist button').length; for(let i=0;i<N;i++){ anchors.unshift(a); a=shift(S.mode,a,-1); } S.anchor=anchors[+b.dataset.i]; } CNOTE=""; render(); });
   const m=document.getElementById('cMore'); if(m) m.onclick=()=>{ CDAYS+=40; drawCat(); };
 }
 document.getElementById('cBack').onclick=()=>ovClose(hideCat);
@@ -1137,37 +1192,43 @@ const RM_=matchMedia('(prefers-reduced-motion: reduce)');
 function countTo(el,v){ const from=el._v==null?v:el._v; el._v=v; cancelAnimationFrame(el._raf);
   if(RM_.matches||from===v){ el.textContent=inr(v); return; }
   const t0=performance.now(), D=520, step=t=>{ const k=Math.min(1,(t-t0)/D), e=1-Math.pow(1-k,3); el.textContent=inr(Math.round(from+(v-from)*e)); if(k<1) el._raf=requestAnimationFrame(step); }; el._raf=requestAnimationFrame(step); }
-const PMODES=[["day","Day"],["week","Week"],["month","Month"],["year","Year"],["all","All"]];
-function setMode(m){ S.mode=m; store.set("mode",m); if(m!=="interval") S.anchor=today(); S.open.clear(); render(); }
 function render(){
   const rows=filtered();
-  const prev=S.mode==="all"?null:(S.mode==="interval"?"‹ Earlier":"‹ "+label(S.mode,shift(S.mode,S.anchor,-1),true));
-  const next=S.mode==="all"?null:(S.mode==="interval"?"Later ›":label(S.mode,shift(S.mode,S.anchor,1),true)+" ›");
-  const pb=document.getElementById('prevBtn'), nb=document.getElementById('nextBtn');
-  pb.textContent=prev||""; pb.disabled=!prev; nb.textContent=next||""; nb.disabled=!next;
   document.getElementById('curBtn').textContent=label(S.mode,S.anchor);
-  const ps=document.getElementById('pseg'); ps.innerHTML=PMODES.map(([k,l])=>`<button type="button" data-m="${k}" aria-pressed="${S.mode===k}">${l}</button>`).join("");
-  ps.querySelectorAll('button').forEach(b=>b.onclick=()=>setMode(b.dataset.m));
   document.getElementById('subtitle').textContent=[S.paid==="All"?"Both":"Paid by "+S.paid, S.forW==="All"?"For everyone":"For "+S.forW, S.nw==="All"?null:S.nw].filter(Boolean).join(" · ");
   const list=S.view==="list";
   document.getElementById('home').hidden=list; document.getElementById('ledger').hidden=!list;
   document.getElementById('listL').setAttribute('aria-pressed',String(list)); document.getElementById('viewRing').setAttribute('aria-pressed',String(!list));
   { const t=isoDay(today()); const v=filtered(false).filter(r=>r.iso===t).reduce((s,r)=>s+r.a,0); document.getElementById('todayAmt').textContent=inr(v); }
-  if(list){ drawLedger(rows); const L=document.getElementById('ledger'); if(lastDir){ L.style.setProperty('--dx',(lastDir*-40)+'px'); L.classList.remove('in'); void L.offsetWidth; L.classList.add('in'); } lastDir=0; }
+  if(list){ drawLedger(rows); lastDir=0; }
   else { drawChart(rows); drawTrend(document.getElementById('trend'),rows); const sp=document.getElementById('splitsC'), h=splitsHTML(rows); sp.innerHTML=h?`<div class="gch"><h3>Who paid, and for what</h3></div>`+h:""; sp.hidden=!h; }
   if(CAT) drawCat();
 }
 function go(dir){ if(S.mode==="all") return; lastDir=dir; if(S.mode==="interval") shiftInterval(dir); else S.anchor=shift(S.mode,S.anchor,dir); S.open.clear(); drawChart.all=false; LDAYS=40; render(); }
-document.getElementById('prevBtn').onclick=()=>go(-1);
-document.getElementById('nextBtn').onclick=()=>go(1);
 document.getElementById('curBtn').onclick=()=>openDrawer();
 document.getElementById('segv').onclick=()=>setView(S.view==="list"?"chart":"list");
 document.getElementById('todayBtn').onclick=()=>{ S.mode="day"; store.set("mode","day"); S.anchor=today(); S.open.clear(); setView("list"); };
-document.addEventListener('keydown',e=>{ if(e.target.closest('input,.drawer,.sheet'))return; if(e.key==="ArrowLeft")go(-1); if(e.key==="ArrowRight")go(1); });
-(()=>{ let x0=null,y0=0; const zone=document.querySelector('main');
-  zone.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY;},{passive:true});
-  zone.addEventListener('touchend',e=>{ if(x0==null)return; const dx=e.changedTouches[0].clientX-x0, dy=e.changedTouches[0].clientY-y0; x0=null; const row=e.target.closest&&e.target.closest('.txw,.stage svg,svg.bars'); if(row||Date.now()-swipedAt<400) return;
-    if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.4) go(dx<0?1:-1); },{passive:true}); })();
+/* swipe the page left or right: it follows your finger, and on letting go the next (or previous) day / week / month slides in.
+   No labels needed. Touches that start on the ring, the bars or an entry keep doing their own thing. */
+let RINGTOUCH=false;
+const PAGER=(()=>{ const zone=document, title=document.getElementById('curBtn'); let x0=null,y0=0,dx=0,mode=0,t0=0,el=null,busy=false;
+  const cur=()=>document.getElementById(S.view==="list"?'ledger':'home');
+  const set=(x,ms)=>{ for(const n of [el,title]){ if(!n) continue; n.style.transition=ms?`transform ${ms}ms cubic-bezier(.22,.8,.3,1),opacity ${ms}ms`:'none'; n.style.transform=x?`translate3d(${x}px,0,0)`:''; }
+    if(el) el.style.opacity=x?String(1-Math.min(.6,Math.abs(x)/innerWidth*.9)):''; };
+  function flip(dir){ if(busy||S.mode==="all") return; busy=true; el=cur(); const W=Math.min(innerWidth,520);
+    if(RM_.matches){ go(dir); busy=false; return; }
+    set(-dir*W,170); setTimeout(()=>{ go(dir); el=cur(); set(dir*W*.45,0); void el.offsetWidth; requestAnimationFrame(()=>{ set(0,280); setTimeout(()=>{ el&&(el.style.transition='',el.style.opacity=''); title.style.transition=''; busy=false; },300); }); },175); }
+  zone.addEventListener('touchstart',e=>{ x0=null; if(busy||e.touches.length>1||RINGTOUCH||!e.target.closest||!e.target.closest('.app')||e.target.closest('.txw,svg.bars,input,textarea,.dock')||document.body.classList.contains('dopen')) return;
+    x0=e.touches[0].clientX; y0=e.touches[0].clientY; dx=0; mode=0; t0=performance.now(); },{passive:true});
+  zone.addEventListener('touchmove',e=>{ if(x0==null) return; const mx=e.touches[0].clientX-x0, my=e.touches[0].clientY-y0;
+    if(!mode){ if(Math.abs(mx)>10&&Math.abs(mx)>Math.abs(my)*1.2){ mode=1; el=cur(); } else if(Math.abs(my)>10){ mode=-1; return; } else return; }
+    if(mode!==1) return; dx=mx; set(S.mode==="all"?dx*.15:dx); },{passive:true});
+  const end=()=>{ if(x0==null){ RINGTOUCH=false; return; } x0=null; RINGTOUCH=false; if(mode!==1) return;
+    const v=Math.abs(dx)/Math.max(1,performance.now()-t0), far=Math.abs(dx)>innerWidth*.22||(v>.45&&Math.abs(dx)>40);
+    if(far&&S.mode!=="all"&&Date.now()-swipedAt>400) flip(dx<0?1:-1); else set(0,240); };
+  zone.addEventListener('touchend',end,{passive:true}); zone.addEventListener('touchcancel',end,{passive:true});
+  return {flip}; })();
+document.addEventListener('keydown',e=>{ if(e.target.closest('input,.drawer,.sheet'))return; if(e.key==="ArrowLeft")PAGER.flip(-1); if(e.key==="ArrowRight")PAGER.flip(1); });
 
 /* ---------- drawer ---------- */
 const scrim=document.getElementById('scrim'), drawer=document.getElementById('drawer');
@@ -1235,7 +1296,8 @@ document.getElementById('closeSearch').onclick=closeSearch; q.oninput=()=>{ clea
 /* ---------- live data from the sheet (Apps Script) ---------- */
 const syncEl=document.getElementById('sync'), syncTxt=document.getElementById('syncTxt'), syncBtn=syncEl;   /* the status line is the sync button now (tap it, or pull down) */
 const fmtWhen=ms=>{const d=new Date(ms); return `${d.getDate()} ${MON[d.getMonth()]}, ${d.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'})}`;};
-function setSync(kind,txt){ syncEl.className="sync "+kind+(loading?" spin":""); syncTxt.textContent=txt; }
+function setSync(kind,txt){ syncEl.className="sync "+kind+(loading?" spin":""); syncTxt.textContent=txt; syncEl.hidden=kind!=="warn";   /* home shows it only when something needs attention */
+  const d=document.getElementById('dSync'); if(d) d.textContent=kind==="warn"?txt:(CACHE_AT?`Synced ${fmtWhen(CACHE_AT)} · ${SERVER.length.toLocaleString('en-IN')} entries`:txt); }
 let LAST_PULL=0, USER="", loading=false, CACHE_AT=0, SERVER=[], OUT=store.get("outbox",[]), flushing=false;
 const saveOut=()=>store.set("outbox",OUT);
 const asRow=p=>({d:new Date(p.date+"T00:00:00"),iso:p.date,a:+p.amount,p:p.paidBy||"",c:p.category,nw:p.needWant||"",n:p.note||"",f:p.expenseFor||"",s:p.category==="House"?(p.houseSub||""):"",pending:1});
@@ -1288,10 +1350,11 @@ function errText(e){ const m=String(e&&e.message||e||"");
   if(/Locked/.test(m)){ if(!gate.hidden) gErr.textContent=m; return m; }
   if(/permission|access|not have|denied|authoriz/i.test(m)) return "This Google account can't open the expense sheet. Ask Aditya to share it with you.";
   return m || "Couldn't reach Google just now. Tap Sync to try again."; }
-function pull(){ if(loading) return; if(!PW()){ askPass(); return; } flush(); loading=true; syncBtn.classList.add('spin'); LAST_PULL=Date.now(); if(!ROWS.length) setSync("","Loading your sheet…"); else setSync("",`Showing saved copy from ${fmtWhen(CACHE_AT)} · updating…`);
-  google.script.run.withSuccessHandler(d=>{loading=false; syncBtn.classList.remove('spin'); applyData(d);})
-    .withFailureHandler(e=>{loading=false; syncBtn.classList.remove('spin'); LOADING=false; render(); const m=errText(e); if(ROWS.length&&e&&e.net) setSync("warn",`Offline copy · last synced ${fmtWhen(CACHE_AT)}`+(OUT.length?` · ${OUT.length} waiting to sync`:"")); else setSync("warn",m);}).getData(PW()); }
-syncBtn.onclick=pull;
+function pull(){ if(loading) return; if(!PW()){ askPass(); return; } flush(); loading=true; syncBtn.classList.add('spin'); document.getElementById('ptr').classList.add('busy'); LAST_PULL=Date.now(); if(!ROWS.length) setSync("","Loading your sheet…"); else setSync("",`Showing saved copy from ${fmtWhen(CACHE_AT)} · updating…`);
+  const done=()=>{ loading=false; syncBtn.classList.remove('spin'); document.getElementById('ptr').classList.remove('busy'); };
+  google.script.run.withSuccessHandler(d=>{done(); applyData(d);})
+    .withFailureHandler(e=>{done(); LOADING=false; render(); const m=errText(e); if(ROWS.length&&e&&e.net) setSync("warn",`Offline copy · last synced ${fmtWhen(CACHE_AT)}`+(OUT.length?` · ${OUT.length} waiting to sync`:"")); else setSync("warn",m);}).getData(PW()); }
+syncBtn.onclick=pull; document.getElementById('dSyncBtn').onclick=()=>pull();
 /* coming back to the app syncs, but not more than once every 30 seconds */
 document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==="visible"&&Date.now()-LAST_PULL>30000) pull(); });
 
@@ -1495,6 +1558,9 @@ const deck=()=>document.documentElement.getAttribute("data-skin")==="deck";
     clearTimeout(t); if(cur&&cur!==el) cur.classList.remove("tapd"); cur=el; el.classList.add("tapd"); },{passive:true});
   const up=()=>{ const el=cur; cur=null; if(el) t=setTimeout(()=>el.classList.remove("tapd"),150); };
   addEventListener("pointerup",up,{passive:true}); addEventListener("pointercancel",up,{passive:true}); })();
+/* the 3D ring leans with the phone (two CSS variables, at most once a frame; nothing redrawn) */
+(()=>{ let gx=0,gy=0,raf=0; addEventListener("deviceorientation",e=>{ if(e.gamma==null||!deck()||still()) return; gx=Math.max(-1,Math.min(1,e.gamma/35)); gy=Math.max(-1,Math.min(1,(e.beta-45)/35));
+  if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; const st=document.getElementById("stage"); st.style.setProperty("--gx",gx.toFixed(2)); st.style.setProperty("--gy",gy.toFixed(2)); }); },{passive:true}); })();
 /* numbers roll up to their new value */
 function countUp(el,a,b,ms,fmt){ if(!el) return; if(still()){ el.textContent=fmt(b); return; } const t0=performance.now();
   const step=now=>{ const k=Math.min(1,(now-t0)/ms), e=1-Math.pow(1-k,3); el.textContent=fmt(a+(b-a)*e); if(k<1&&el.isConnected) requestAnimationFrame(step); }; requestAnimationFrame(step); }
@@ -1550,7 +1616,7 @@ const BGK=(()=>{ const c=document.getElementById("bgk"), g=c.getContext("2d"); l
   wake();
   return {kick(k){ boost=Math.min(2.4,boost+k); },wake,on:()=>run}; })();
 /* updates: a banner when a new version is published */
-const APP_VERSION="2.7";
+const APP_VERSION="2.8";
 document.getElementById('verTxt').textContent="Version "+APP_VERSION;
 /* update card: never pops over an open sheet, the add screen or while typing; waits until you're back on the main screen */
 let UPD=null, updT=0; const $u=id=>document.getElementById(id);

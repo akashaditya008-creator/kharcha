@@ -133,6 +133,21 @@ else:
         ok(pg.evaluate("!document.getElementById('cSheet').hidden&&document.querySelectorAll('#cBody .txw').length>0"), "a category opens on its own screen with its entries")
         pg.evaluate("history.back()"); pg.wait_for_timeout(500)
         ok(pg.evaluate("document.getElementById('cSheet').hidden"), "back closes the category screen")
+        # 2.8: clean home, swipe between periods, category breakdown
+        ok(pg.evaluate("!document.getElementById('prevBtn')&&!document.getElementById('nextBtn')&&!document.getElementById('pseg')"), "home has no previous/next labels and no period switch")
+        ok(pg.evaluate("document.getElementById('sync').hidden"), "the sync line is hidden when all is well")
+        t0 = pg.inner_text("#curBtn")
+        pg.evaluate("""(()=>{const t=document.getElementById('todayBtn'); const T=x=>new Touch({identifier:1,target:t,clientX:x,clientY:160});
+          t.dispatchEvent(new TouchEvent('touchstart',{bubbles:true,touches:[T(330)],changedTouches:[T(330)]}));
+          for(let x=320;x>=90;x-=23) t.dispatchEvent(new TouchEvent('touchmove',{bubbles:true,touches:[T(x)],changedTouches:[T(x)]}));
+          t.dispatchEvent(new TouchEvent('touchend',{bubbles:true,touches:[],changedTouches:[T(90)]}));})()""")
+        pg.wait_for_timeout(900); t1 = pg.inner_text("#curBtn")
+        ok(t1 != t0, f"swiping left moves to the next period ({t0} → {t1})")
+        pg.keyboard.press("ArrowLeft"); pg.wait_for_timeout(900)
+        ok(pg.inner_text("#curBtn") == t0, "and back again")
+        pg.evaluate("[...document.querySelectorAll('#legend .lrow')][0].click()"); pg.wait_for_timeout(600)
+        ok(pg.evaluate("/Where it went/.test(document.getElementById('cBody').innerText)&&!document.querySelector('#cBody svg.bars')"), "a category shows where the money went (no per-day bar chart)")
+        pg.evaluate("history.back()"); pg.wait_for_timeout(400)
         ok(not errs, "no JavaScript errors in the 2.7 screens" + ("" if not errs else ": " + errs[0][:160]))
         ok(not errs, "no JavaScript errors signed in" + ("" if not errs else ": " + errs[0][:160]))
         pg.screenshot(path=os.path.join(os.environ.get("CHECK_OUT", tempfile.gettempdir()), "kharcha-signed-in.png"))
