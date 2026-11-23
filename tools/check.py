@@ -145,6 +145,29 @@ else:
         ok(t1 != t0, f"swiping left moves to the next period ({t0} → {t1})")
         pg.keyboard.press("ArrowLeft"); pg.wait_for_timeout(900)
         ok(pg.inner_text("#curBtn") == t0, "and back again")
+        # 2.9: swipe across the ring changes period; tap picks a slice; a long press peeks and lets go; one-colour title
+        ok(pg.evaluate("getComputedStyle(document.querySelector('.brand h1')).backgroundImage")=="none", "the title is one colour")
+        RT = """(kind,pts)=>{const s=document.querySelector('#stage svg'),n=s.querySelector('.seg[data-i="0"]'),r=n.getBoundingClientRect();
+          const T=(x,y)=>new Touch({identifier:7,target:n,clientX:x,clientY:y}); const [x,y]=pts[0];
+          n.dispatchEvent(new TouchEvent(kind,{bubbles:true,cancelable:true,touches:kind==='touchend'?[]:[T(x,y)],changedTouches:[T(x,y)]}));}"""
+        pt = pg.evaluate("""(()=>{const s=document.querySelector('#stage svg'); for(let a=0;a<360;a+=3){const r=s.getBoundingClientRect(),k=r.width/300,t=(a-90)*Math.PI/180;
+          const x=r.left+(150+108*Math.cos(t))*k,y=r.top+(150+108*Math.sin(t))*k,e=document.elementFromPoint(x,y); if(e&&e.classList.contains('seg')&&e.dataset.i==='0') return [x,y];} return null;})()""")
+        ok(pt is not None, "found the first slice on the ring")
+        x, y = pt
+        t0 = pg.inner_text("#curBtn")
+        pg.evaluate(f"({RT})('touchstart',[[{x},{y}]])")
+        for k in range(1, 11): pg.evaluate(f"({RT})('touchmove',[[{x-k*22},{y+k*4}]])")
+        pg.evaluate(f"({RT})('touchend',[[{x-220},{y+40}]])"); pg.wait_for_timeout(900)
+        ok(pg.inner_text("#curBtn") != t0 and pg.evaluate("(document.querySelector('#stage svg .seg.on')?+document.querySelector('#stage svg .seg.on').dataset.i:-1)")==-1, "a swipe that starts on the ring moves to the next period without picking a slice")
+        pg.keyboard.press("ArrowLeft"); pg.wait_for_timeout(900)
+        pg.mouse.click(x, y); pg.wait_for_timeout(450)
+        ok(pg.evaluate("(document.querySelector('#stage svg .seg.on')?+document.querySelector('#stage svg .seg.on').dataset.i:-1)===0&&document.querySelector('#stage svg').classList.contains('sel')"), "a tap on a slice picks it")
+        pg.mouse.click(x, y); pg.wait_for_timeout(450)
+        ok(pg.evaluate("(document.querySelector('#stage svg .seg.on')?+document.querySelector('#stage svg .seg.on').dataset.i:-1)===-1"), "tapping it again clears it")
+        pg.evaluate(f"({RT})('touchstart',[[{x},{y}]])"); pg.wait_for_timeout(520)
+        held = pg.evaluate("(document.querySelector('#stage svg .seg.on')?+document.querySelector('#stage svg .seg.on').dataset.i:-1)===0&&document.querySelector('#stage svg').classList.contains('held')")
+        pg.evaluate(f"({RT})('touchend',[[{x},{y}]])"); pg.wait_for_timeout(450)
+        ok(held and pg.evaluate("(document.querySelector('#stage svg .seg.on')?+document.querySelector('#stage svg .seg.on').dataset.i:-1)===-1"), "a long press shows the slice while held and lets go on release")
         pg.evaluate("[...document.querySelectorAll('#legend .lrow')][0].click()"); pg.wait_for_timeout(600)
         ok(pg.evaluate("/Where it went/.test(document.getElementById('cBody').innerText)&&!document.querySelector('#cBody svg.bars')"), "a category shows where the money went (no per-day bar chart)")
         pg.evaluate("history.back()"); pg.wait_for_timeout(400)

@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JDgtvwqonQSJcprhWAkzWZXJ9vykRf2wa9Jgqc1UMqw=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-srFawqMubM0wj2HShVaPgtJZgwd0XW7avDXm/SChkO0=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JDgtvwqonQSJcprhWAkzWZXJ9vykRf2wa9Jgqc1UMqw=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-4yceDMAzGP8BQZjGjNjbg9mhyufV5JW3dUcsdTc2vTs=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>try{var s=JSON.parse(localStorage.getItem("acx:skin")||"\"\"");if(!localStorage.getItem("acx:deck26"))s="deck";if(s)document.documentElement.setAttribute("data-skin",s);}catch(e){}
 /* the font is fetched without holding up the first paint (the phone font shows until it arrives) */
@@ -449,7 +449,7 @@ input,textarea{-webkit-user-select:text;user-select:text;-webkit-touch-callout:d
 :root[data-skin="deck"] #bgk{display:block}
 :root[data-skin="deck"] .app{position:relative;z-index:1;background:transparent}
 :root[data-skin="deck"] header.top{border-bottom:1px solid var(--line)}
-:root[data-skin="deck"] .brand h1{background:linear-gradient(90deg,var(--ink),var(--tint));-webkit-background-clip:text;background-clip:text;color:transparent}
+:root[data-skin="deck"] .brand h1{color:var(--tint)}
 :root[data-skin="deck"] .brand p{color:var(--muted)}
 :root[data-skin="deck"] .card,:root[data-skin="deck"] .lines,:root[data-skin="deck"] .today,:root[data-skin="deck"] .txs{border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 52%,transparent);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 16px 30px -20px #000}
@@ -521,9 +521,16 @@ body::before{background:var(--bar)}
 .ringc{padding:10px 12px 6px}
 .stage{position:relative}
 .stage svg{display:block;width:100%;max-width:300px;margin:0 auto;touch-action:pan-y;cursor:pointer;overflow:visible}
-.stage .seg{transition:opacity .22s ease,stroke-width .22s cubic-bezier(.34,1.56,.64,1)}
-.stage svg.sel .seg{opacity:.22}
-.stage svg.sel .seg.on{opacity:1;stroke-width:42}
+.stage svg{-webkit-touch-callout:none}
+/* selected slice: eases outward a few px and thickens, a soft halo of its own colour fades in behind it, the rest fade back.
+   No springs, no filters: one calm 0.4 s ease so it feels like the slice is lifted, not bounced */
+.stage .seg,.stage .halo{transition:opacity .4s cubic-bezier(.2,.8,.2,1),stroke-width .4s cubic-bezier(.2,.8,.2,1),transform .4s cubic-bezier(.2,.8,.2,1)}
+.stage svg.sel .seg{opacity:.3;stroke-width:27}
+.stage svg.sel .seg.on{opacity:1;stroke-width:37;transform:translate(var(--lx),var(--ly))}
+.stage .halo{opacity:0;pointer-events:none}
+.stage svg.sel .halo{opacity:.2;transform:translate(var(--lx),var(--ly))}
+.stage svg.held .seg.on{stroke-width:40}
+#ctrG{transform-box:view-box;transform-origin:150px 150px}
 .ctr-l{font:600 11px var(--body);letter-spacing:.12em;fill:var(--muted)}
 .ctr-v{font-family:var(--display);font-weight:700;fill:var(--ink);letter-spacing:-.02em}
 .ctr-s{font:500 12.5px var(--body);fill:var(--muted)}
@@ -689,7 +696,7 @@ body.dopen{overflow:hidden}
   .csheet:not([hidden]){animation:cin .38s var(--ease)} @keyframes cin{from{transform:translateX(100%)}to{transform:none}}
   .ledger.in,#home.in{animation:slidein .38s var(--ease)}
 }
-@media (prefers-reduced-motion:reduce){ .drawer,.app,.dock,.stage .seg{transition:none} }
+@media (prefers-reduced-motion:reduce){ .drawer,.app,.dock,.stage .seg,.stage .halo{transition:none} }
 
 /* ================= 2.8 ================= */
 .period{display:flex;justify-content:center;padding-block:10px 0}
@@ -979,20 +986,21 @@ function deltaHTML(total,cls){ const p=prevTotal(); if(p==null||(!p&&!total)) re
 const RG={cx:150,cy:150,r:108,w:30};
 const ptR=(r,deg)=>{const t=(deg-90)*Math.PI/180;return [RG.cx+r*Math.cos(t),RG.cy+r*Math.sin(t)];};
 function arcR(a0,a1){ if(a1-a0>=359.99) a1=a0+359.99; const [x0,y0]=ptR(RG.r,a0),[x1,y1]=ptR(RG.r,a1); return `M${x0.toFixed(2)} ${y0.toFixed(2)}A${RG.r} ${RG.r} 0 ${a1-a0>180?1:0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`; }
-let lastDir=0; const HOME={sl:[],total:0,sel:-1,n:0};
+let lastDir=0; const HOME={sl:[],total:0,sel:-1,pin:-1,n:0};
 function drawChart(rows){
   const total=sumA(rows), gs=groups(rows); let a=0;
   const sl=gs.map(g=>{ const s={...g,a0:a,a1:a+(total?g.sum/total*360:0)}; a=s.a1; return s; });
-  Object.assign(HOME,{sl,total,sel:-1,n:rows.length});
+  Object.assign(HOME,{sl,total,sel:-1,pin:-1,n:rows.length});
   let svg=`<svg viewBox="0 0 300 300" role="img" aria-label="Spending by category. Touch the ring to see each category">`;
-  svg+=`<circle cx="${RG.cx}" cy="${RG.cy}" r="${RG.r}" fill="none" stroke="var(--track)" stroke-width="${RG.w}"/>`;
+  svg+=`<circle cx="${RG.cx}" cy="${RG.cy}" r="${RG.r}" fill="none" stroke="var(--track)" stroke-width="${RG.w}"/><path class="halo" id="halo" fill="none" stroke-width="56"/>`;
   sl.forEach((g,i)=>{ const span=g.a1-g.a0; if(span<.2) return; const gap=sl.length>1?Math.min(.9,span/3):0;
-    svg+=`<path class="seg" data-i="${i}" d="${arcR(g.a0+gap,g.a1-gap)}" fill="none" stroke="${catMeta(g.c)[1]}" stroke-width="${RG.w}" pathLength="1"/>`; });
-  svg+=`<g id="cIco" transform="translate(138 70)" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></g>`;
+    const m=(g.a0+g.a1)/2*Math.PI/180, lift=span>300?0:6;
+    svg+=`<path class="seg" data-i="${i}" style="--lx:${(Math.sin(m)*lift).toFixed(2)}px;--ly:${(-Math.cos(m)*lift).toFixed(2)}px" d="${arcR(g.a0+gap,g.a1-gap)}" fill="none" stroke="${catMeta(g.c)[1]}" stroke-width="${RG.w}" pathLength="1"/>`; });
+  svg+=`<g id="ctrG"><g id="cIco" transform="translate(138 70)" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></g>`;
   svg+=`<text class="ctr-l" id="cL" x="150" y="122" text-anchor="middle">SPENT</text>`;
   svg+=`<text class="ctr-v num" id="cV" x="150" y="156" text-anchor="middle">${inr(total)}</text>`;
   svg+=`<text class="ctr-s num" id="cS" x="150" y="180" text-anchor="middle"></text>`;
-  svg+=`<text class="ctr-d" id="cD" x="150" y="202" text-anchor="middle"></text></svg>`;
+  svg+=`<text class="ctr-d" id="cD" x="150" y="202" text-anchor="middle"></text></g></svg>`;
   const st=document.getElementById('stage'); st.innerHTML=svg+`<button type="button" class="ctrbtn" id="ctrBtn" aria-label="Open this category"></button>`;
   const el=st.firstChild; el.style.setProperty('--dx',(lastDir*-24)+'px'); el.classList.add('in'); lastDir=0;
   const key=label(S.mode,S.anchor)+'|'+total+'|'+sl.length; if(key!==drawChart.key){ drawChart.key=key; if(!LOADING) el.classList.add('draw'); }
@@ -1003,13 +1011,15 @@ function drawChart(rows){
     return `<button type="button" class="lrow" data-i="${i}" style="--cc:${col}"><span class="lic">${icon(g.c,col)}</span><span class="ln"><b>${esc(g.c)}</b><small>${g.n} ${g.n===1?"entry":"entries"}</small></span><span class="la num"><b>${inr(g.sum)}</b><small>${pctTxt(g.sum,total)}</small></span><i class="lbar"><i style="width:${total?Math.max(2,g.sum/total*100):0}%"></i></i></button>`; }).join("")
     +(sl.length>6?`<button type="button" class="lmore" id="lMore">${more?`Show all ${sl.length} categories`:"Show fewer"}</button>`:"")
     :`<div class="empty">${LOADING?"Loading your sheet…":`Nothing spent in ${esc(label(S.mode,S.anchor))}. Swipe or use the arrows to look at another period.`}</div>`;
-  lg.querySelectorAll('.lrow').forEach(b=>{ b.onclick=()=>openCat(sl[+b.dataset.i].c); b.onpointerenter=e=>{ if(e.pointerType==="mouse") showCenter(+b.dataset.i); }; b.onpointerleave=e=>{ if(e.pointerType==="mouse") showCenter(-1); }; });
+  lg.querySelectorAll('.lrow').forEach(b=>{ b.onclick=()=>openCat(sl[+b.dataset.i].c); b.onpointerenter=e=>{ if(e.pointerType==="mouse") showCenter(+b.dataset.i); }; b.onpointerleave=e=>{ if(e.pointerType==="mouse") showCenter(HOME.pin); }; });
   const lm=document.getElementById('lMore'); if(lm) lm.onclick=()=>{ drawChart.all=!drawChart.all; drawChart(rows); };
   wireRing(el);
 }
 /* centre of the ring: the total, or the category under your finger */
-function showCenter(i){ const g=HOME.sl[i], st=document.getElementById('stage'), el=st.querySelector('svg'); if(!el) return; HOME.sel=g?i:-1;
-  el.classList.toggle('sel',!!g); el.querySelectorAll('.seg').forEach(p=>p.classList.toggle('on',+p.dataset.i===i));
+function showCenter(i){ const g=HOME.sl[i], st=document.getElementById('stage'), el=st.querySelector('svg'); if(!el) return; const was=HOME.sel; HOME.sel=g?i:-1;
+  el.classList.toggle('sel',!!g); let on=null; el.querySelectorAll('.seg').forEach(p=>{ const k=+p.dataset.i===i; p.classList.toggle('on',k); if(k) on=p; });
+  const h=el.querySelector('#halo'); if(h&&on){ h.setAttribute('d',on.getAttribute('d')); h.setAttribute('stroke',on.getAttribute('stroke')); h.style.cssText=on.style.cssText; }
+  const cg=el.querySelector('#ctrG'); if(cg&&was!==HOME.sel&&cg.animate&&!matchMedia('(prefers-reduced-motion: reduce)').matches) cg.animate([{opacity:.15,transform:'translateY(4px) scale(.97)'},{opacity:1,transform:'none'}],{duration:260,easing:'cubic-bezier(.2,.8,.2,1)'});
   document.querySelectorAll('#legend .lrow').forEach(b=>b.classList.toggle('on',+b.dataset.i===i));
   const $c=id=>document.getElementById(id), ico=$c('cIco'), btn=$c('ctrBtn');
   if(g){ const col=catMeta(g.c)[1]; ico.setAttribute('stroke',col); ico.innerHTML=`<path d="${P[catMeta(g.c)[0]]}"${catMeta(g.c)[0]==='dots'?' stroke-width="3"':''}/>`;
@@ -1021,25 +1031,36 @@ function showCenter(i){ const g=HOME.sl[i], st=document.getElementById('stage'),
     const p=prevTotal(); let d=""; if(p&&HOME.total){ const k=Math.round((HOME.total-p)/p*100); d=`${k>0?"▲":k<0?"▼":"="} ${Math.abs(k)}% vs ${prevName()}`; }
     $c('cD').textContent=d; $c('cD').setAttribute('class','ctr-d'+(d?(d[0]==="▲"?" up":" down"):"")); btn.hidden=true; }
   const v=$c('cV'), L=(v.textContent||"").length; v.setAttribute('font-size',L>11?24:L>9?28:32); }
-/* touch the ring and slide around it: the centre follows your finger instantly (no redraw, just a class and four texts) */
-function wireRing(svg){ let down=false, raf=0, last=null;
+/* the ring: a tap picks a slice (tap it again to clear); a long press shows the slice under your finger while you hold and slide round,
+   and lets go back to how it was; a swipe across it moves to the next period like anywhere else */
+function wireRing(svg){ let raf=0, t=null;
   const at=e=>{ const r=svg.getBoundingClientRect(), x=(e.clientX-r.left)*300/r.width-RG.cx, y=(e.clientY-r.top)*300/r.height-RG.cy;
     return {d:Math.hypot(x,y), ang:(Math.atan2(x,-y)*180/Math.PI+360)%360}; };
   /* the browser finds the slice under the finger exactly, tilt and lean included; the angle maths only fills the hair-thin gaps */
   const pick=e=>{ const n=document.elementFromPoint(e.clientX,e.clientY); if(n&&n.classList&&n.classList.contains('seg')) return +n.dataset.i;
     if(n&&n!==svg&&!svg.contains(n)) return null; const {d,ang}=at(e); if(d<RG.r-RG.w/2-12||d>RG.r+RG.w/2+16) return null;
     const i=HOME.sl.findIndex(g=>ang>=g.a0&&ang<g.a1); return i<0?null:i; };
-  /* a touch that lands on the ring is kept for sliding round it; anywhere else on the chart the page scrolls / swipes as usual */
-  svg.addEventListener('touchstart',e=>{ const t=e.touches[0]; if(e.touches.length===1&&pick(t)!=null){ RINGTOUCH=true; e.preventDefault(); } },{passive:false});
-  const move=e=>{ last=e; if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; const i=pick(last); if(i!=null&&i!==HOME.sel){ showCenter(i); try{navigator.vibrate&&navigator.vibrate(4);}catch(_){} } }); };
-  svg.addEventListener('pointerdown',e=>{ const {d}=at(e), i=pick(e);
-    if(i!=null){ down=true; try{svg.setPointerCapture(e.pointerId);}catch(_){} showCenter(i); e.preventDefault(); }
-    else if(d>=RG.r-RG.w/2-16){ showCenter(-1); } });
-  svg.addEventListener('pointermove',e=>{ if(down||e.pointerType==="mouse") move(e); });
-  const up=()=>{ down=false; }; svg.addEventListener('pointerup',up); svg.addEventListener('pointercancel',up);
+  const buzz=ms=>{ try{navigator.vibrate&&navigator.vibrate(ms);}catch(_){} };
+  const rest=()=>{ svg.classList.remove('held'); showCenter(HOME.pin); };
+  const stop=()=>{ if(!t) return; clearTimeout(t.timer); if(t.lp){ RINGTOUCH=false; rest(); } t=null; };
+  svg.addEventListener('touchstart',e=>{ stop(); if(e.touches.length!==1) return; const p=e.touches[0], i=pick(p); if(i==null) return;
+    t={x0:p.clientX,y0:p.clientY,x:p.clientX,y:p.clientY,lp:false};
+    t.timer=setTimeout(()=>{ if(!t) return; t.lp=true; RINGTOUCH=true; svg.classList.add('held'); const k=pick({clientX:t.x,clientY:t.y}); showCenter(k==null?i:k); buzz(8); },380); },{passive:true});
+  svg.addEventListener('touchmove',e=>{ if(!t) return; const p=e.touches[0]; t.x=p.clientX; t.y=p.clientY;
+    if(t.lp){ if(e.cancelable) e.preventDefault(); if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; if(!t) return; const k=pick({clientX:t.x,clientY:t.y}); if(k!=null&&k!==HOME.sel){ showCenter(k); buzz(4); } }); return; }
+    if(Math.hypot(t.x-t.x0,t.y-t.y0)>9){ clearTimeout(t.timer); t=null; } },{passive:false});
+  svg.addEventListener('touchend',e=>{ if(t&&t.lp&&e.cancelable) e.preventDefault(); stop(); });   // no click after a long press
+  svg.addEventListener('touchcancel',stop);
+  /* a tap (finger or mouse) */
+  svg.addEventListener('click',e=>{ const i=pick(e);
+    if(i!=null){ HOME.pin=HOME.pin===i?-1:i; showCenter(HOME.pin); }
+    else if(at(e).d>=RG.r-RG.w/2-16&&HOME.pin>=0){ HOME.pin=-1; showCenter(-1); } });
+  svg.addEventListener('contextmenu',e=>e.preventDefault());
+  /* mouse: hovering previews, leaving returns to the tapped slice */
+  svg.addEventListener('pointermove',e=>{ if(e.pointerType!=="mouse") return; const i=pick(e); if(i!=null&&i!==HOME.sel) showCenter(i); });
   const cb=document.getElementById('ctrBtn');
-  svg.addEventListener('pointerleave',e=>{ if(e.pointerType==="mouse"&&!down&&e.relatedTarget!==cb) showCenter(-1); });
-  cb.addEventListener('pointerleave',e=>{ if(e.pointerType==="mouse"&&e.relatedTarget!==svg&&!svg.contains(e.relatedTarget)) showCenter(-1); });
+  svg.addEventListener('pointerleave',e=>{ if(e.pointerType==="mouse"&&e.relatedTarget!==cb) showCenter(HOME.pin); });
+  cb.addEventListener('pointerleave',e=>{ if(e.pointerType==="mouse"&&e.relatedTarget!==svg&&!svg.contains(e.relatedTarget)) showCenter(HOME.pin); });
   cb.onclick=()=>{ const g=HOME.sl[HOME.sel]; if(g) openCat(g.c); }; }
 /* ---------- spending over time: bars for each day (or month), tap or slide across them ---------- */
 const DAYMS=864e5;
@@ -1220,9 +1241,11 @@ const PAGER=(()=>{ const zone=document, title=document.getElementById('curBtn');
     set(-dir*W,170); setTimeout(()=>{ go(dir); el=cur(); set(dir*W*.45,0); void el.offsetWidth; requestAnimationFrame(()=>{ set(0,280); setTimeout(()=>{ el&&(el.style.transition='',el.style.opacity=''); title.style.transition=''; busy=false; },300); }); },175); }
   zone.addEventListener('touchstart',e=>{ x0=null; if(busy||e.touches.length>1||RINGTOUCH||!e.target.closest||!e.target.closest('.app')||e.target.closest('.txw,svg.bars,input,textarea,.dock')||document.body.classList.contains('dopen')) return;
     x0=e.touches[0].clientX; y0=e.touches[0].clientY; dx=0; mode=0; t0=performance.now(); },{passive:true});
-  zone.addEventListener('touchmove',e=>{ if(x0==null) return; const mx=e.touches[0].clientX-x0, my=e.touches[0].clientY-y0;
-    if(!mode){ if(Math.abs(mx)>10&&Math.abs(mx)>Math.abs(my)*1.2){ mode=1; el=cur(); } else if(Math.abs(my)>10){ mode=-1; return; } else return; }
-    if(mode!==1) return; dx=mx; set(S.mode==="all"?dx*.15:dx); },{passive:true});
+  /* sideways wins up to ~55° from flat, so a loose diagonal swipe still turns the page; once sideways the page stops scrolling */
+  zone.addEventListener('touchmove',e=>{ if(x0==null) return; if(RINGTOUCH){ if(mode===1) set(0,200); x0=null; return; }
+    const mx=e.touches[0].clientX-x0, my=e.touches[0].clientY-y0;
+    if(!mode){ if(Math.hypot(mx,my)<8) return; if(Math.abs(mx)>Math.abs(my)*.7){ mode=1; el=cur(); } else { mode=-1; return; } }
+    if(mode!==1) return; if(e.cancelable) e.preventDefault(); dx=mx; set(S.mode==="all"?dx*.15:dx); },{passive:false});
   const end=()=>{ if(x0==null){ RINGTOUCH=false; return; } x0=null; RINGTOUCH=false; if(mode!==1) return;
     const v=Math.abs(dx)/Math.max(1,performance.now()-t0), far=Math.abs(dx)>innerWidth*.22||(v>.45&&Math.abs(dx)>40);
     if(far&&S.mode!=="all"&&Date.now()-swipedAt>400) flip(dx<0?1:-1); else set(0,240); };
@@ -1621,7 +1644,7 @@ const BGK=(()=>{ const c=document.getElementById("bgk"), g=c.getContext("2d"); l
   wake();
   return {kick(k){ boost=Math.min(2.4,boost+k); },wake,on:()=>run}; })();
 /* updates: a banner when a new version is published */
-const APP_VERSION="2.8";
+const APP_VERSION="2.9";
 document.getElementById('verTxt').textContent="Version "+APP_VERSION;
 /* update card: never pops over an open sheet, the add screen or while typing; waits until you're back on the main screen */
 let UPD=null, updT=0; const $u=id=>document.getElementById(id);
