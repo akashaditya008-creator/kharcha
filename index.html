@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JDgtvwqonQSJcprhWAkzWZXJ9vykRf2wa9Jgqc1UMqw=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-4yceDMAzGP8BQZjGjNjbg9mhyufV5JW3dUcsdTc2vTs=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JDgtvwqonQSJcprhWAkzWZXJ9vykRf2wa9Jgqc1UMqw=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-06xHctRRh+cWAV7KRUYyvN7nTtJdD+oXUdyLDCxHHXM=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>try{var s=JSON.parse(localStorage.getItem("acx:skin")||"\"\"");if(!localStorage.getItem("acx:deck26"))s="deck";if(s)document.documentElement.setAttribute("data-skin",s);}catch(e){}
 /* the font is fetched without holding up the first paint (the phone font shows until it arrives) */
@@ -719,6 +719,44 @@ body.dopen{overflow:hidden}
 .hist b{font:600 12.5px var(--display)} .hist small{font-size:11px;color:var(--muted);white-space:nowrap}
 .hist button.cur{background:color-mix(in srgb,var(--tint) 16%,transparent);box-shadow:inset 0 0 0 1.5px var(--tint)}
 .kpis b.up{color:var(--spend)} .kpis b.down{color:var(--ok)}
+/* 3.0: home in two pages — the big ring on its own, then (swipe up) the categories */
+.hp1{display:flex;flex-direction:column;min-height:var(--p1h,auto)}
+.hp1 .ringc{flex:1;display:grid;place-items:center;padding:6px}
+.hp1 .stage{width:100%}
+.hp1 .stage svg{max-width:min(470px,var(--rs,320px))}
+:root[data-skin="deck"] .hp1 .stage::before{max-width:calc(var(--rs,320px)*.8)}
+.hnext{display:flex;align-items:center;justify-content:center;gap:4px;margin:6px auto 0;padding:6px 14px;border-radius:999px;font:600 13px var(--body);color:var(--muted);background:transparent}
+.hnext svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+@media (prefers-reduced-motion:no-preference){ .hnext svg{animation:hnudge 2.6s ease-in-out infinite} @keyframes hnudge{50%{transform:translateY(3px)}} }
+.hp2 .legend{margin-top:0}
+/* 3.0: the saved / updated card — bigger, with the category's month and year totals */
+.yay{width:min(90vw,380px);box-sizing:border-box;justify-items:stretch;gap:12px;padding:18px 18px 16px;overflow:hidden}
+.yay>*{justify-self:stretch;width:100%;box-sizing:border-box}
+.yay .yhd{display:flex;align-items:center;gap:14px;text-align:left}
+.yay .ycap{text-align:left}
+.yay .ystats span{text-align:left}
+.yay .tick{width:52px;height:52px;flex:none}
+.yay .yt{display:grid;gap:1px;min-width:0}
+.yay .yt small{font:600 12px var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--tint)}
+.yay .yamt{font-size:36px;line-height:1.1}
+.yay .yt b{font:600 16px var(--body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yay .ycap{font:600 12.5px var(--body);color:var(--muted);margin-bottom:-4px}
+.yay .ystats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.yay .ystats span{display:grid;gap:2px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--tint) 10%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--tint) 22%,transparent)}
+.yay .ystats small{font-size:12px;color:var(--muted)}
+.yay .ystats b{font:700 22px var(--display);letter-spacing:-.02em}
+.yay .ybar{position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--tint);opacity:.7;transform-origin:left;animation:ybar var(--yms,5s) linear forwards}
+@keyframes ybar{to{transform:scaleX(0)}}
+@media (prefers-reduced-motion:reduce){ .yay .ybar{animation:none;display:none} }
+/* 3.0: a category opens on its entries; the breakdown is one tab away */
+.ctabs{position:sticky;top:0;z-index:3;display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:0 calc(-1*max(16px,env(safe-area-inset-left,0px)));padding:10px max(16px,env(safe-area-inset-left,0px));background:var(--bar)}
+:root[data-skin="deck"] .ctabs{background:rgba(5,9,15,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.ctabs button{padding:10px 8px;border-radius:12px;font:600 14px var(--body);color:var(--muted);background:var(--chip);white-space:nowrap;transition:background .2s,color .2s}
+.ctabs button[aria-selected="true"]{background:var(--tint);color:var(--head-ink)}
+.ctabs small{font-weight:500;opacity:.8;margin-left:3px}
+.csheet .lseg.subs{margin-top:4px}
+.cfilt{display:flex;align-items:center;gap:8px;margin:10px 0 0;padding:8px 10px 8px 14px;border-radius:999px;font:500 13.5px var(--body);color:var(--ink);background:color-mix(in srgb,var(--tint) 14%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--tint) 35%,transparent)}
+.cfilt svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 </style>
 
 <canvas id="bgk" aria-hidden="true"></canvas>
@@ -743,9 +781,11 @@ body.dopen{overflow:hidden}
       <button class="today" id="todayBtn" aria-label="Spent today, tap to see today"><small>Today</small><b class="num" id="todayAmt">₹0</b></button>
     </div>
     <section id="home" class="home">
-      <div class="gc ringc"><section class="stage" id="stage" aria-label="Spending by category"></section><div class="legend" id="legend"></div></div>
+      <div class="hp1" id="hp1"><div class="gc ringc"><section class="stage" id="stage" aria-label="Spending by category"></section></div>
+        <button type="button" class="hnext" id="hNext" aria-label="Show categories"><svg viewBox="0 0 24 24"><path d="M6 10l6 6 6-6"/></svg>Categories</button></div>
+      <div class="hp2" id="hp2"><div class="gc"><div class="gch"><h3>Categories</h3><span class="muted" id="lgSum"></span></div><div class="legend" id="legend"></div></div>
       <div class="gc" id="trend"></div>
-      <div class="gc" id="splitsC"></div>
+      <div class="gc" id="splitsC"></div></div>
     </section>
     <section id="ledger" class="ledger" hidden></section>
   </main>
@@ -1006,6 +1046,7 @@ function drawChart(rows){
   const key=label(S.mode,S.anchor)+'|'+total+'|'+sl.length; if(key!==drawChart.key){ drawChart.key=key; if(!LOADING) el.classList.add('draw'); }
   showCenter(-1);
   /* legend: every category, biggest first; the first six show, the rest behind "Show all" */
+  document.getElementById('lgSum').textContent=total?inr(total):"";
   const lg=document.getElementById('legend'), more=sl.length>6&&!drawChart.all;
   lg.innerHTML=sl.length?sl.slice(0,more?6:sl.length).map((g,i)=>{ const col=catMeta(g.c)[1];
     return `<button type="button" class="lrow" data-i="${i}" style="--cc:${col}"><span class="lic">${icon(g.c,col)}</span><span class="ln"><b>${esc(g.c)}</b><small>${g.n} ${g.n===1?"entry":"entries"}</small></span><span class="la num"><b>${inr(g.sum)}</b><small>${pctTxt(g.sum,total)}</small></span><i class="lbar"><i style="width:${total?Math.max(2,g.sum/total*100):0}%"></i></i></button>`; }).join("")
@@ -1155,8 +1196,8 @@ function drawLedger(rows){
 }
 
 /* ---------- one category: its own screen (slides in), entries by day ---------- */
-const cSheet=document.getElementById('cSheet'), cBody=document.getElementById('cBody'); let CAT=null, CSUB="", CNOTE="", CDAYS=40;
-function openCat(c){ CAT=c; CSUB=""; CNOTE=""; CDAYS=40; drawCat(); cSheet.hidden=false; cBody.scrollTop=0; ovOpen(hideCat); }
+const cSheet=document.getElementById('cSheet'), cBody=document.getElementById('cBody'); let CAT=null, CSUB="", CNOTE="", CDAYS=40, CTAB="list";
+function openCat(c){ CAT=c; CSUB=""; CNOTE=""; CDAYS=40; CTAB="list"; drawCat(); cSheet.hidden=false; cBody.scrollTop=0; ovOpen(hideCat); }
 const hideCat=()=>{ cSheet.hidden=true; CAT=null; };
 const inrK=n=>n>=1e5?"₹"+(n/1e5).toFixed(n>=1e6?0:1).replace(/\.0$/,"")+"L":n>=1e3?"₹"+(n/1e3).toFixed(n>=1e4?0:1).replace(/\.0$/,"")+"k":inr(n);
 const noteKey=r=>(r.n||"").trim().replace(/\s+/g," ").toLowerCase();
@@ -1187,18 +1228,28 @@ function drawCat(){ if(!CAT) return; const all=filtered().filter(r=>r.c===CAT), 
   const rows=CNOTE&&CNOTE!=="~rest~"?bySub.filter(r=>(noteKey(r)||"~none~")===CNOTE):bySub;
   const total=sumA(bySub), whole=sumA(filtered()), n=bySub.length;
   document.getElementById('cIc').innerHTML=icon(CAT,col); document.getElementById('cIc').style.setProperty('--cc',col);
-  document.getElementById('cTitle').textContent=CAT; document.getElementById('cSubT').textContent=label(S.mode,S.anchor)+(S.paid!=="All"?" · paid by "+S.paid:"");
+  document.getElementById('cTitle').textContent=CAT; document.getElementById('cSubT').textContent=label(S.mode,S.anchor)+" · "+inr(total)+(S.paid!=="All"?" · paid by "+S.paid:"");
   const subs=[...new Set(all.map(r=>r.s).filter(Boolean))];
-  let h=`<div class="gc sum" style="--cc:${col}"><div class="sumt"><div><small>Spent on ${esc(CAT)}${CSUB?" · "+esc(CSUB.replace("House - ","")):""}</small><b class="num" style="color:${col}">${inr(total)}</b></div></div>
-    <div class="kpis"><span><b class="num">${n}</b><small>${n===1?"entry":"entries"}</small></span><span><b class="num">${pctTxt(total,whole)}</b><small>of all spending</small></span><span>${catVsPrev(total)}<small>vs ${esc(prevName())}</small></span></div></div>`;
+  /* two tabs: the entries themselves (first), and the breakdown — where it went and the last few periods */
+  let h=`<div class="ctabs" role="tablist"><button type="button" role="tab" data-t="list" aria-selected="${CTAB==="list"}">Entries <small class="num">${n}</small></button><button type="button" role="tab" data-t="where" aria-selected="${CTAB==="where"}">Where it went · trend</button></div>`;
   if(subs.length) h+=`<div class="lseg subs"><button type="button" data-s="" aria-pressed="${!CSUB}">All <small class="num">${inr(sumA(all))}</small></button>${subs.map(sb=>`<button type="button" data-s="${esc(sb)}" aria-pressed="${CSUB===sb}">${esc(sb.replace("House - ",""))} <small class="num">${inr(sumA(all.filter(r=>r.s===sb)))}</small></button>`).join("")}</div>`;
-  const items=whereItems(bySub,col), topK=new Set(items.map(x=>x.key)), wh=n?whereHTML(items,total):"", hi=histHTML();
-  if(wh) h+=`<div class="gc">${wh}</div>`; if(hi) h+=`<div class="gc" style="--cc:${col}">${hi}</div>`;
-  const list=CNOTE==="~rest~"?bySub.filter(r=>!topK.has(noteKey(r)||"~none~")):rows;   /* "Everything else": the smaller groups' entries */
-  h+=`<div class="days">${list.length?daysHTML(list,false,CDAYS,"cMore"):`<div class="gc"><div class="empty">Nothing here in ${esc(label(S.mode,S.anchor))}.</div></div>`}</div>`;
+  const items=whereItems(bySub,col), topK=new Set(items.map(x=>x.key));
+  if(CTAB==="where"){
+    h+=`<div class="gc sum" style="--cc:${col}"><div class="sumt"><div><small>Spent on ${esc(CAT)}${CSUB?" · "+esc(CSUB.replace("House - ","")):""}</small><b class="num" style="color:${col}">${inr(total)}</b></div></div>
+    <div class="kpis"><span><b class="num">${n}</b><small>${n===1?"entry":"entries"}</small></span><span><b class="num">${pctTxt(total,whole)}</b><small>of all spending</small></span><span>${catVsPrev(total)}<small>vs ${esc(prevName())}</small></span></div></div>`;
+    const wh=n?whereHTML(items,total):"", hi=histHTML();
+    if(wh) h+=`<div class="gc">${wh}</div>`; if(hi) h+=`<div class="gc" style="--cc:${col}">${hi}</div>`;
+    if(!wh&&!hi) h+=`<div class="gc"><div class="empty">Nothing here in ${esc(label(S.mode,S.anchor))}.</div></div>`;
+  } else {
+    if(CNOTE){ const it=items.find(x=>x.key===CNOTE); h+=`<button type="button" class="cfilt" id="cFilt"><span>Only <b>${esc(it?it.name:"these")}</b></span><svg viewBox="0 0 24 24"><path d="M7 7l10 10M17 7L7 17"/></svg></button>`; }
+    const list=CNOTE==="~rest~"?bySub.filter(r=>!topK.has(noteKey(r)||"~none~")):rows;   /* "Everything else": the smaller groups' entries */
+    h+=`<div class="days">${list.length?daysHTML(list,false,CDAYS,"cMore"):`<div class="gc"><div class="empty">Nothing here in ${esc(label(S.mode,S.anchor))}.</div></div>`}</div>`;
+  }
   cBody.innerHTML=h;
   cBody.querySelectorAll('.subs button').forEach(b=>b.onclick=()=>{ CSUB=b.dataset.s; CNOTE=""; drawCat(); });
-  cBody.querySelectorAll('.wrow').forEach(b=>b.onclick=()=>{ CNOTE=CNOTE===b.dataset.k?"":b.dataset.k; const y=cBody.scrollTop; drawCat(); cBody.scrollTop=y; });
+  cBody.querySelectorAll('.ctabs button').forEach(b=>b.onclick=()=>{ if(CTAB===b.dataset.t) return; CTAB=b.dataset.t; drawCat(); cBody.scrollTop=0; });
+  cBody.querySelectorAll('.wrow').forEach(b=>b.onclick=()=>{ CNOTE=b.dataset.k; CTAB="list"; CDAYS=40; drawCat(); cBody.scrollTop=0; });   /* see just those entries */
+  const cf=document.getElementById('cFilt'); if(cf) cf.onclick=()=>{ CNOTE=""; drawCat(); };
   cBody.querySelectorAll('.hist button').forEach(b=>b.onclick=()=>{ const anchors=[]; if(S.mode==="all"){ const P=[...cBody.querySelectorAll('.hist small')].map(x=>+x.textContent); S.mode="year"; store.set("mode","year"); S.anchor=new Date(P[+b.dataset.i],0,1); }
     else { let a=S.anchor; const N=cBody.querySelectorAll('.hist button').length; for(let i=0;i<N;i++){ anchors.unshift(a); a=shift(S.mode,a,-1); } S.anchor=anchors[+b.dataset.i]; } CNOTE=""; render(); });
   const m=document.getElementById('cMore'); if(m) m.onclick=()=>{ CDAYS+=40; drawCat(); };
@@ -1206,6 +1257,40 @@ function drawCat(){ if(!CAT) return; const all=filtered().filter(r=>r.c===CAT), 
 document.getElementById('cBack').onclick=()=>ovClose(hideCat);
 (()=>{ let x0=null,y0=0; cSheet.addEventListener('touchstart',e=>{ x0=e.touches[0].clientX<28?e.touches[0].clientX:null; y0=e.touches[0].clientY; },{passive:true});   /* swipe from the left edge goes back */
   cSheet.addEventListener('touchend',e=>{ if(x0!=null&&e.changedTouches[0].clientX-x0>70&&Math.abs(e.changedTouches[0].clientY-y0)<60) ovClose(hideCat); x0=null; },{passive:true}); })();
+
+/* ---------- home in two pages: the ring alone fills the first screen; swipe up about a third of the way and the categories page comes up,
+   swipe down about a third from there and the ring comes back. A quick flick goes the way it was flicked. Below the top of page 2 it scrolls freely. ---------- */
+var HP={P:0,anim:0,busy:false};
+function hpOn(){ return S.view!=="list"&&!document.getElementById('home').hidden&&!document.body.classList.contains('dopen'); }
+function hpSize(){ const p1=document.getElementById('hp1'), p2=document.getElementById('hp2'); if(!p1||!hpOn()) return;
+  const hd=document.querySelector('header.top'), dk=document.querySelector('.dock .in'), H=innerHeight;
+  const hh=hd?hd.getBoundingClientRect().height:0, dh=dk?Math.max(0,H-dk.getBoundingClientRect().top):0, top=p1.getBoundingClientRect().top+scrollY;
+  const h=Math.max(320,Math.round(H-dh-top-4)); p1.style.setProperty('--p1h',h+'px');
+  p1.style.setProperty('--rs',Math.round(Math.max(230,Math.min(p1.clientWidth+24,h-40)))+'px');
+  p2.style.minHeight=Math.round(H-hh)+'px';
+  HP.P=Math.max(0,Math.round(p2.getBoundingClientRect().top+scrollY-hh-2)); }
+function hpGo(t){ cancelAnimationFrame(HP.anim); const y0=scrollY, d=t-y0; if(Math.abs(d)<2){ HP.busy=false; return; }
+  if(still()){ scrollTo(0,t); HP.busy=false; return; }
+  HP.busy=true; const t0=performance.now(), D=Math.min(460,240+Math.abs(d)*.35);
+  const step=now=>{ const k=Math.min(1,(now-t0)/D), e=1-Math.pow(1-k,3); scrollTo(0,Math.round(y0+d*e)); if(k<1) HP.anim=requestAnimationFrame(step); else HP.busy=false; };
+  HP.anim=requestAnimationFrame(step); }
+(()=>{ let s0=null, ys=[], idle=0;
+  const skip=e=>e.target.closest&&e.target.closest('.add,.sheet,.drawer,.esheet,.csheet,.gate,.upd,.yay');
+  /* where to land, given where the touch began (s0), where it is now (y) and how fast it was moving (v, px per ms, + is down the page) */
+  const pick=(s0,y,v)=>{ const P=HP.P; if(Math.abs(v)>.45) return v>0?P:0; return s0<P*.5?(y>P*.33?P:0):(y<P*.67?0:P); };
+  addEventListener('touchstart',e=>{ cancelAnimationFrame(HP.anim); HP.busy=false; s0=null; ys=[];
+    if(e.touches.length!==1||!hpOn()||skip(e)) return; hpSize(); s0=scrollY; },{passive:true});
+  addEventListener('touchmove',()=>{ if(s0==null) return; const n=performance.now(); ys.push([n,scrollY]); while(ys.length>2&&n-ys[0][0]>90) ys.shift(); },{passive:true});
+  addEventListener('touchend',e=>{ if(s0==null||e.touches.length) return; const a=s0, y=scrollY; s0=null; const P=HP.P;
+    if(!P||Math.abs(y-a)<3) return; if(a>=P-2&&y>=P-2) return;          // free scrolling within page 2
+    let v=0; if(ys.length>1){ const [t1,y1]=ys[0],[t2,y2]=ys[ys.length-1]; if(t2-t1>8) v=(y2-y1)/(t2-t1); } ys=[];
+    if(y>P&&v>0) return;                                                   // flung on past the top of page 2: let it run
+    hpGo(pick(a,y,v)); },{passive:true});
+  /* a mouse wheel or a fling that ends half-way: settle on the nearer page */
+  addEventListener('scroll',()=>{ clearTimeout(idle); if(HP.busy||s0!=null) return; idle=setTimeout(()=>{ const P=HP.P, y=scrollY; if(!HP.busy&&s0==null&&hpOn()&&P&&y>2&&y<P-2) hpGo(y>P*.5?P:0); },180); },{passive:true});
+  addEventListener('resize',()=>{ hpSize(); },{passive:true});
+  document.getElementById('hNext').onclick=()=>{ hpSize(); hpGo(HP.P); };
+})();
 
 /* ---------- render ---------- */
 function setView(v){ S.view=v; store.set("view",v); render(); }
@@ -1222,7 +1307,7 @@ function render(){
   document.getElementById('listL').setAttribute('aria-pressed',String(list)); document.getElementById('viewRing').setAttribute('aria-pressed',String(!list));
   { const t=isoDay(today()); const v=filtered(false).filter(r=>r.iso===t).reduce((s,r)=>s+r.a,0); document.getElementById('todayAmt').textContent=inr(v); }
   if(list){ drawLedger(rows); lastDir=0; }
-  else { drawChart(rows); drawTrend(document.getElementById('trend'),rows); const sp=document.getElementById('splitsC'), h=splitsHTML(rows); sp.innerHTML=h?`<div class="gch"><h3>Who paid, and for what</h3></div>`+h:""; sp.hidden=!h; }
+  else { drawChart(rows); drawTrend(document.getElementById('trend'),rows); const sp=document.getElementById('splitsC'), h=splitsHTML(rows); sp.innerHTML=h?`<div class="gch"><h3>Who paid, and for what</h3></div>`+h:""; sp.hidden=!h; requestAnimationFrame(hpSize); }
   if(CAT) drawCat();
 }
 function go(dir){ if(S.mode==="all") return; lastDir=dir; if(S.mode==="interval") shiftInterval(dir); else S.anchor=shift(S.mode,S.anchor,dir); S.open.clear(); drawChart.all=false; LDAYS=40; render(); }
@@ -1494,10 +1579,11 @@ function save(cat,sub,btn){
   payload.rid=A.rid;
   if(ed){ payload.row=ed.rn; payload.ts=ed.ts; payload.oldAmt=ed.a; }
   // Saved on the phone at once; sent to the sheet in the background (kept and retried if offline).
+  const before=catSums(cat,payload.date);
   OUT.push({kind:ed?"edit":"add",p:payload,at:Date.now()}); saveOut();
   ROWS=withPending(SERVER); closeAdd(); render(); if(!sheet.hidden) doSearch();
   const label=cat+(sub?" ("+sub.replace("House - ","")+")":"");
-  if(ed) showToast(`Updated ${inr(amt)} · ${label}`); else saved(amt,label,payload.date);
+  saved(amt,label,payload.date,{cat,before,after:catSums(cat,payload.date),edited:!!ed});
   flush();
 }
 
@@ -1587,16 +1673,26 @@ const deck=()=>document.documentElement.getAttribute("data-skin")==="deck";
 /* numbers roll up to their new value */
 function countUp(el,a,b,ms,fmt){ if(!el) return; if(still()){ el.textContent=fmt(b); return; } const t0=performance.now();
   const step=now=>{ const k=Math.min(1,(now-t0)/ms), e=1-Math.pow(1-k,3); el.textContent=fmt(a+(b-a)*e); if(k<1&&el.isConnected) requestAnimationFrame(step); }; requestAnimationFrame(step); }
-/* after saving an expense: calm, clear, and never in the way */
-function saved(amt,label,iso){ if(navigator.vibrate) navigator.vibrate([10,40,16]);
-  document.querySelectorAll(".yay").forEach(n=>n.remove());
-  const ym=String(iso||"").slice(0,7), mon=ROWS.filter(r=>r.d&&(r.d.getFullYear()+"-"+String(r.d.getMonth()+1).padStart(2,"0"))===ym).reduce((x,r)=>x+(+r.a||0),0);
-  const y=document.createElement("div"); y.className="yay"; y.setAttribute("role","status");
-  y.innerHTML=`<span class="tick"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span class="yamt" id="yAmt">${esc(inr(0))}</span><b>${esc(label)}</b><small>This month so far <span id="yMon">${esc(inr(Math.max(0,mon-amt)))}</span></small>`;
+/* what has gone on one category in the month and in the year of a date (every entry, whoever paid) */
+function catSums(c,iso){ const ym=String(iso||"").slice(0,7), yr=ym.slice(0,4); let m=0,y=0;
+  for(const r of ROWS){ if(r.c!==c||!r.d||String(r.d.getFullYear())!==yr) continue; y+=+r.a||0; if(yr+"-"+String(r.d.getMonth()+1).padStart(2,"0")===ym) m+=+r.a||0; }
+  return {m,y}; }
+/* after saving or updating an expense: a clear card with what that category now comes to this month and this year.
+   Stays about 5 seconds (a line runs down), never blocks a touch, and the next touch sends it away. */
+function saved(amt,label,iso,o){ o=o||{}; if(navigator.vibrate) navigator.vibrate([10,40,16]);
+  document.querySelectorAll(".yay").forEach(n=>n.remove()); clearTimeout(saved.t1); clearTimeout(saved.t2);
+  const ym=String(iso||"").slice(0,7), mi=+ym.slice(5,7)-1, yr=ym.slice(0,4), cat=o.cat||label, b=o.before||{m:0,y:0}, a=o.after||catSums(cat,iso), MS=5200;
+  const y=document.createElement("div"); y.className="yay"+(o.edited?" ed":""); y.setAttribute("role","status"); y.style.setProperty("--yms",MS+"ms");
+  y.innerHTML=`<div class="yhd"><span class="tick"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+      <div class="yt"><small>${o.edited?"Updated":"Saved"}</small><span class="yamt" id="yAmt">${esc(inr(o.edited?amt:0))}</span><b>${esc(label)}</b></div></div>
+    <div class="ycap">Spent on ${esc(cat)}</div>
+    <div class="ystats"><span><small>In ${esc(MONL[mi]||"this month")}</small><b class="num" id="yMon">${esc(inr(b.m))}</b></span><span><small>In ${esc(yr||"this year")}</small><b class="num" id="yYr">${esc(inr(b.y))}</b></span></div>
+    <i class="ybar"></i>`;
   document.body.appendChild(y);
   let gone=false; const bye=()=>{ if(gone) return; gone=true; removeEventListener("pointerdown",bye,true); y.classList.add("bye"); setTimeout(()=>y.remove(),360); };
-  setTimeout(bye,2300); setTimeout(()=>{ if(!gone) addEventListener("pointerdown",bye,true); },450);
-  countUp(document.getElementById("yAmt"),0,amt,650,inr); setTimeout(()=>countUp(document.getElementById("yMon"),Math.max(0,mon-amt),mon,800,inr),450);
+  saved.t1=setTimeout(bye,MS); saved.t2=setTimeout(()=>{ if(!gone) addEventListener("pointerdown",bye,true); },700);
+  if(!o.edited) countUp(document.getElementById("yAmt"),0,amt,650,inr);
+  setTimeout(()=>{ countUp(document.getElementById("yMon"),b.m,a.m,850,inr); countUp(document.getElementById("yYr"),b.y,a.y,950,inr); },420);
   if(!still()){ BGK.kick(2); const st=document.getElementById("stage"); st.classList.remove("swell"); void st.offsetWidth; st.classList.add("swell"); } }
 /* the background of the Artha look: a floor grid running to the horizon and line-art objects drifting at three depths.
    Plain 2D canvas (no library), about 30 frames a second, asleep whenever the app is hidden, another theme is chosen or motion is off. */
@@ -1644,7 +1740,7 @@ const BGK=(()=>{ const c=document.getElementById("bgk"), g=c.getContext("2d"); l
   wake();
   return {kick(k){ boost=Math.min(2.4,boost+k); },wake,on:()=>run}; })();
 /* updates: a banner when a new version is published */
-const APP_VERSION="2.9";
+const APP_VERSION="2.10";
 document.getElementById('verTxt').textContent="Version "+APP_VERSION;
 /* update card: never pops over an open sheet, the add screen or while typing; waits until you're back on the main screen */
 let UPD=null, updT=0; const $u=id=>document.getElementById(id);
