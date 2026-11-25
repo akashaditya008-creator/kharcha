@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JDgtvwqonQSJcprhWAkzWZXJ9vykRf2wa9Jgqc1UMqw=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-+rqQ/6c9ZkqMXmRM8wlniTD1OcUKCUD+ZmGhJDvqDLQ=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JDgtvwqonQSJcprhWAkzWZXJ9vykRf2wa9Jgqc1UMqw=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-e9Hhhd3nVY5cu/bWmxGsY6KGVV0Q5JUZor1470bsD+A=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>try{var s=JSON.parse(localStorage.getItem("acx:skin")||"\"\"");if(!localStorage.getItem("acx:deck26"))s="deck";if(s)document.documentElement.setAttribute("data-skin",s);}catch(e){}
 /* the font is fetched without holding up the first paint (the phone font shows until it arrives) */
@@ -525,11 +525,11 @@ body::before{background:var(--bar)}
 /* selected slice: eases outward a few px and thickens, a soft halo of its own colour fades in behind it, the rest fade back.
    No springs, no filters: one calm 0.4 s ease so it feels like the slice is lifted, not bounced */
 .stage .seg,.stage .halo{transition:opacity .4s cubic-bezier(.2,.8,.2,1),stroke-width .4s cubic-bezier(.2,.8,.2,1),transform .4s cubic-bezier(.2,.8,.2,1)}
-.stage svg.sel .seg{opacity:.3;stroke-width:27}
-.stage svg.sel .seg.on{opacity:1;stroke-width:37;transform:translate(var(--lx),var(--ly))}
+.stage svg.sel .seg{opacity:.3;stroke-width:30}
+.stage svg.sel .seg.on{opacity:1;stroke-width:40;transform:translate(var(--lx),var(--ly))}
 .stage .halo{opacity:0;pointer-events:none}
 .stage svg.sel .halo{opacity:.2;transform:translate(var(--lx),var(--ly))}
-.stage svg.held .seg.on{stroke-width:40}
+.stage svg.held .seg.on{stroke-width:43}
 #ctrG{transform-box:view-box;transform-origin:150px 150px}
 .ctr-l{font:600 11px var(--body);letter-spacing:.12em;fill:var(--muted)}
 .ctr-v{font-family:var(--display);font-weight:700;fill:var(--ink);letter-spacing:-.02em}
@@ -721,7 +721,7 @@ body.dopen{overflow:hidden}
 .kpis b.up{color:var(--spend)} .kpis b.down{color:var(--ok)}
 /* 3.0: home in two pages — the big ring on its own, then (swipe up) the categories */
 .hp1{display:flex;flex-direction:column;min-height:var(--p1h,auto)}
-.hp1 .ringc{flex:1;display:grid;place-items:center;padding:6px;background:radial-gradient(circle at 50% 52%,color-mix(in srgb,var(--tint) 9%,transparent),transparent 62%),color-mix(in srgb,var(--surface) 88%,transparent);box-shadow:0 0 0 .5px color-mix(in srgb,var(--line) 55%,transparent);-webkit-backdrop-filter:none;backdrop-filter:none}
+.hp1 .ringc{flex:1;display:grid;place-items:center;padding:2px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;background:radial-gradient(circle at 50% 52%,color-mix(in srgb,var(--tint) 9%,transparent),transparent 62%),color-mix(in srgb,var(--surface) 88%,transparent);box-shadow:0 0 0 .5px color-mix(in srgb,var(--line) 55%,transparent);-webkit-backdrop-filter:none;backdrop-filter:none}
 .hpg:not(.hp1){display:flow-root}
 html,body{overflow-x:clip}
 /* the ring sweeps in, slice after slice, when it opens and when the period changes */
@@ -1051,7 +1051,7 @@ function deltaHTML(total,cls){ const p=prevTotal(); if(p==null||(!p&&!total)) re
   if(!p) return `<span class="dl ${cls||""}">New this ${S.mode==="interval"?"period":S.mode}</span>`;
   const d=Math.round((total-p)/p*100), up=d>0;
   return `<span class="dl ${up?"up":"down"} ${cls||""}">${up?"▲":d<0?"▼":"="} ${Math.abs(d)}% vs ${esc(prevName())}</span>`; }
-const RG={cx:150,cy:150,r:108,w:30};
+const RG={cx:150,cy:150,r:116,w:34};
 const ptR=(r,deg)=>{const t=(deg-90)*Math.PI/180;return [RG.cx+r*Math.cos(t),RG.cy+r*Math.sin(t)];};
 function arcR(a0,a1){ if(a1-a0>=359.99) a1=a0+359.99; const [x0,y0]=ptR(RG.r,a0),[x1,y1]=ptR(RG.r,a1); return `M${x0.toFixed(2)} ${y0.toFixed(2)}A${RG.r} ${RG.r} 0 ${a1-a0>180?1:0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`; }
 let lastDir=0; const HOME={sl:[],total:0,sel:-1,pin:-1,n:0};
@@ -1112,14 +1112,21 @@ function wireRing(svg){ let raf=0, t=null;
   const buzz=ms=>{ try{navigator.vibrate&&navigator.vibrate(ms);}catch(_){} };
   const rest=()=>{ svg.classList.remove('held'); showCenter(HOME.pin); };
   const stop=()=>{ if(!t) return; clearTimeout(t.timer); if(t.lp){ RINGTOUCH=false; rest(); } t=null; };
-  svg.addEventListener('touchstart',e=>{ stop(); if(e.touches.length!==1) return; const p=e.touches[0], i=pick(p); if(i==null) return;
-    t={x0:p.clientX,y0:p.clientY,x:p.clientX,y:p.clientY,lp:false};
-    t.timer=setTimeout(()=>{ if(!t) return; t.lp=true; RINGTOUCH=true; svg.classList.add('held'); const k=pick({clientX:t.x,clientY:t.y}); showCenter(k==null?i:k); buzz(8); },380); },{passive:true});
-  svg.addEventListener('touchmove',e=>{ if(!t) return; const p=e.touches[0]; t.x=p.clientX; t.y=p.clientY;
-    if(t.lp){ if(e.cancelable) e.preventDefault(); if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; if(!t) return; const k=pick({clientX:t.x,clientY:t.y}); if(k!=null&&k!==HOME.sel){ showCenter(k); buzz(4); } }); return; }
-    if(Math.hypot(t.x-t.x0,t.y-t.y0)>9){ clearTimeout(t.timer); t=null; } },{passive:false});
-  svg.addEventListener('touchend',e=>{ if(t&&t.lp&&e.cancelable) e.preventDefault(); stop(); });   // no click after a long press
-  svg.addEventListener('touchcancel',stop);
+  /* long press anywhere on the ring panel (the ring, its middle or around it), then slide sideways with the finger anywhere on screen:
+     every ~38 px to the right shows the next category round the ring, to the left the one before. The middle stays readable.
+     Letting go returns to the tapped slice (or none). A quick swipe without the press still changes the period. */
+  const zone=svg.closest('.ringc')||svg, STEP=38; if(zone._ac) zone._ac.abort(); const ac=zone._ac=new AbortController(), on={signal:ac.signal};
+  zone.addEventListener('touchstart',e=>{ stop(); if(e.touches.length!==1||!HOME.sl.length) return; const p=e.touches[0], i=pick(p);
+    const i0=i!=null?i:HOME.pin>=0?HOME.pin:0;
+    t={x0:p.clientX,y0:p.clientY,x:p.clientX,y:p.clientY,lp:false,i0,cur:i0};
+    t.timer=setTimeout(()=>{ if(!t) return; t.lp=true; t.ax=t.x; RINGTOUCH=true; svg.classList.add('held'); showCenter(t.i0); buzz(8); },380); },{passive:true,...on});
+  zone.addEventListener('touchmove',e=>{ if(!t) return; const p=e.touches[0]; t.x=p.clientX; t.y=p.clientY;
+    if(t.lp){ if(e.cancelable) e.preventDefault(); if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; if(!t) return;
+        const k=Math.max(0,Math.min(HOME.sl.length-1,t.i0+Math.trunc((t.x-t.ax)/STEP))); if(k!==t.cur){ t.cur=k; showCenter(k); buzz(4); } }); return; }
+    if(Math.hypot(t.x-t.x0,t.y-t.y0)>9){ clearTimeout(t.timer); t=null; } },{passive:false,...on});
+  zone.addEventListener('touchend',e=>{ if(t&&t.lp&&e.cancelable) e.preventDefault(); stop(); },on);   // no click after a long press
+  zone.addEventListener('touchcancel',stop,on);
+  zone.addEventListener('contextmenu',e=>e.preventDefault(),on);
   /* a tap (finger or mouse) */
   svg.addEventListener('click',e=>{ const i=pick(e);
     if(i!=null){ HOME.pin=HOME.pin===i?-1:i; showCenter(HOME.pin); }
@@ -1333,7 +1340,7 @@ function hpSize(){ const p1=document.getElementById('hp1'); if(!p1||!hpOn()) ret
   const hd=document.querySelector('header.top'), dk=document.querySelector('.dock .in'), H=document.documentElement.clientHeight;
   const hh=hd?hd.getBoundingClientRect().height:0, dh=dk?Math.max(0,H-dk.getBoundingClientRect().top):0, top=p1.getBoundingClientRect().top+scrollY;
   const h=Math.max(320,Math.round(H-dh-top)); p1.style.setProperty('--p1h',h+'px');
-  p1.style.setProperty('--rs',Math.round(Math.max(230,Math.min(p1.clientWidth+24,h-40)))+'px');
+  p1.style.setProperty('--rs',Math.round(Math.max(230,Math.min(p1.clientWidth+14,h-24)))+'px');
   const avail=H-hh-dh, pages=[...home.querySelectorAll('.hpg')].filter(n=>!n.hidden);
   pages.forEach((n,i)=>{ if(i) n.style.minHeight=Math.round(avail)+'px'; });
   HP.tops=[]; HP.ends=[]; HP.H=H;
@@ -1812,7 +1819,7 @@ const BGK=(()=>{ const c=document.getElementById("bgk"), g=c.getContext("2d"); l
   wake();
   return {kick(k){ boost=Math.min(2.4,boost+k); },wake,on:()=>run}; })();
 /* updates: a banner when a new version is published */
-const APP_VERSION="2.12";
+const APP_VERSION="2.13";
 document.getElementById('verTxt').textContent="Version "+APP_VERSION;
 /* update card: never pops over an open sheet, the add screen or while typing; waits until you're back on the main screen */
 let UPD=null, updT=0; const $u=id=>document.getElementById(id);
@@ -1834,7 +1841,7 @@ setTimeout(checkUpdate,2500); document.addEventListener('visibilitychange',()=>{
 /* pull down at the top to sync */
 (()=>{ const ptr=document.getElementById('ptr'); let y0=null,dy=0;
   addEventListener('touchstart',e=>{ y0=(scrollY<=0&&!e.target.closest('.add,.sheet,.drawer,.esheet,.gate,.txw'))?e.touches[0].clientY:null; dy=0; },{passive:true});
-  addEventListener('touchmove',e=>{ if(y0==null) return; dy=Math.max(0,e.touches[0].clientY-y0); ptr.style.setProperty('--p',Math.min(1,dy/90).toFixed(3)); },{passive:true});
+  addEventListener('touchmove',e=>{ if(y0==null) return; if(e.defaultPrevented||RINGTOUCH){ y0=null; dy=0; ptr.style.setProperty('--p',0); return; } dy=Math.max(0,e.touches[0].clientY-y0); ptr.style.setProperty('--p',Math.min(1,dy/90).toFixed(3)); },{passive:true});
   addEventListener('touchend',()=>{ if(y0==null) return; if(dy>90) pull(); y0=null; dy=0; ptr.style.setProperty('--p',0); },{passive:true});
 })();
 addEventListener('scroll',()=>document.body.classList.toggle('scrolled',scrollY>8),{passive:true});

@@ -172,6 +172,18 @@ else:
         held = pg.evaluate("(document.querySelector('#stage svg .seg.on')?+document.querySelector('#stage svg .seg.on').dataset.i:-1)===0&&document.querySelector('#stage svg').classList.contains('held')")
         pg.evaluate(f"({RT})('touchend',[[{x},{y}]])"); pg.wait_for_timeout(450)
         ok(held and pg.evaluate("(document.querySelector('#stage svg .seg.on')?+document.querySelector('#stage svg .seg.on').dataset.i:-1)===-1"), "a long press shows the slice while held and lets go on release")
+        SC = """(kind,x,y)=>{const n=document.getElementById('ctrBtn').hidden?document.querySelector('#stage svg'):document.getElementById('ctrBtn');const r=document.querySelector('#stage svg').getBoundingClientRect();
+          const T=(x,y)=>new Touch({identifier:9,target:n,clientX:x,clientY:y}); n.dispatchEvent(new TouchEvent(kind,{bubbles:true,cancelable:true,touches:kind==='touchend'?[]:[T(x,y)],changedTouches:[T(x,y)]}));}"""
+        cx, cy = pg.evaluate("(()=>{const r=document.querySelector('#stage svg').getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2]})()")
+        nseg = pg.evaluate("document.querySelectorAll('#stage svg .seg').length")
+        pg.evaluate(f"({SC})('touchstart',{cx},{cy})"); pg.wait_for_timeout(520)
+        a0 = pg.evaluate("(document.querySelector('#stage svg .seg.on')?+document.querySelector('#stage svg .seg.on').dataset.i:-1)")
+        pg.evaluate(f"({SC})('touchmove',{cx+45},{cy+150})"); pg.wait_for_timeout(120)
+        a1 = pg.evaluate("(document.querySelector('#stage svg .seg.on')?+document.querySelector('#stage svg .seg.on').dataset.i:-1)")
+        pg.evaluate(f"({SC})('touchmove',{cx+10},{cy+150})"); pg.wait_for_timeout(120)
+        a2 = pg.evaluate("(document.querySelector('#stage svg .seg.on')?+document.querySelector('#stage svg .seg.on').dataset.i:-1)")
+        pg.evaluate(f"({SC})('touchend',{cx+10},{cy+150})"); pg.wait_for_timeout(300)
+        ok(a0 == 0 and (a1 == 1 or nseg < 2) and a2 == 0 and pg.evaluate("document.getElementById('ptr').classList.contains('busy')") is False, f"a long press in the middle, then sliding right and back, steps through the categories ({a0}→{a1}→{a2})")
         pg.evaluate("[...document.querySelectorAll('#legend .lrow')][0].click()"); pg.wait_for_timeout(600)
         ok(pg.evaluate("document.querySelector('.ctabs [data-t=list]').getAttribute('aria-selected')==='true'&&document.querySelectorAll('#cBody .txw').length>0&&!/Where it went\\n/.test(document.querySelector('#cBody').innerText.replace(/Where it went · trend/,''))"), "a category opens on its entries, with the breakdown in the other tab")
         pg.evaluate("document.querySelector('.ctabs [data-t=where]').click()"); pg.wait_for_timeout(400)
