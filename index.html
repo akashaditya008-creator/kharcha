@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JDgtvwqonQSJcprhWAkzWZXJ9vykRf2wa9Jgqc1UMqw=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-06xHctRRh+cWAV7KRUYyvN7nTtJdD+oXUdyLDCxHHXM=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JDgtvwqonQSJcprhWAkzWZXJ9vykRf2wa9Jgqc1UMqw=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-xr3GoQpJrkit1I+LCJmLbgnffgu8foB3wCnFt4ivzy8=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>try{var s=JSON.parse(localStorage.getItem("acx:skin")||"\"\"");if(!localStorage.getItem("acx:deck26"))s="deck";if(s)document.documentElement.setAttribute("data-skin",s);}catch(e){}
 /* the font is fetched without holding up the first paint (the phone font shows until it arrives) */
@@ -721,19 +721,21 @@ body.dopen{overflow:hidden}
 .kpis b.up{color:var(--spend)} .kpis b.down{color:var(--ok)}
 /* 3.0: home in two pages — the big ring on its own, then (swipe up) the categories */
 .hp1{display:flex;flex-direction:column;min-height:var(--p1h,auto)}
-.hp1 .ringc{flex:1;display:grid;place-items:center;padding:6px}
+.hp1 .ringc{flex:1;display:grid;place-items:center;padding:6px;background:color-mix(in srgb,var(--card) 28%,transparent);box-shadow:0 0 0 .5px color-mix(in srgb,var(--line) 55%,transparent);-webkit-backdrop-filter:none;backdrop-filter:none}
+.hpg:not(.hp1){display:flow-root}
+html,body{overflow-x:clip}
+/* the ring sweeps in, slice after slice, when it opens and when the period changes */
+@media (prefers-reduced-motion:no-preference){ .stage svg.draw .seg{animation:segdraw .75s var(--d,0s) cubic-bezier(.2,.8,.2,1) both} @keyframes segdraw{from{stroke-dashoffset:1}to{stroke-dashoffset:0}} }
 .hp1 .stage{width:100%}
 .hp1 .stage svg{max-width:min(470px,var(--rs,320px))}
 :root[data-skin="deck"] .hp1 .stage::before{max-width:calc(var(--rs,320px)*.8)}
-.hnext{display:flex;align-items:center;justify-content:center;gap:4px;margin:6px auto 0;padding:6px 14px;border-radius:999px;font:600 13px var(--body);color:var(--muted);background:transparent}
-.hnext svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-@media (prefers-reduced-motion:no-preference){ .hnext svg{animation:hnudge 2.6s ease-in-out infinite} @keyframes hnudge{50%{transform:translateY(3px)}} }
-.hp2 .legend{margin-top:0}
+#hp2 .legend{margin-top:0}
+:root[data-skin] .hp1 .ringc{box-shadow:none;border-color:color-mix(in srgb,var(--line) 50%,transparent)}
 /* 3.0: the saved / updated card — bigger, with the category's month and year totals */
 .yay{width:min(90vw,380px);box-sizing:border-box;justify-items:stretch;gap:12px;padding:18px 18px 16px;overflow:hidden}
 .yay>*{justify-self:stretch;width:100%;box-sizing:border-box}
 .yay .yhd{display:flex;align-items:center;gap:14px;text-align:left}
-.yay .ycap{text-align:left}
+.yay .ycap{text-align:left} .yay .ycap b{font:inherit;color:var(--ink)}
 .yay .ystats span{text-align:left}
 .yay .tick{width:52px;height:52px;flex:none}
 .yay .yt{display:grid;gap:1px;min-width:0}
@@ -745,6 +747,9 @@ body.dopen{overflow:hidden}
 .yay .ystats span{display:grid;gap:2px;padding:10px 12px;border-radius:14px;background:color-mix(in srgb,var(--tint) 10%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--tint) 22%,transparent)}
 .yay .ystats small{font-size:12px;color:var(--muted)}
 .yay .ystats b{font:700 22px var(--display);letter-spacing:-.02em}
+.yay .ystats em{font-style:normal;font-size:11.5px;color:var(--muted)}
+.yay .ydl{font-style:normal;justify-self:start;margin-top:4px;padding:2px 8px;border-radius:999px;font:600 12px var(--body);font-variant-numeric:tabular-nums;color:var(--muted);background:var(--chip)}
+.yay .ydl.up{color:var(--tint);background:color-mix(in srgb,var(--tint) 14%,transparent)}
 .yay .ybar{position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--tint);opacity:.7;transform-origin:left;animation:ybar var(--yms,5s) linear forwards}
 @keyframes ybar{to{transform:scaleX(0)}}
 @media (prefers-reduced-motion:reduce){ .yay .ybar{animation:none;display:none} }
@@ -781,11 +786,10 @@ body.dopen{overflow:hidden}
       <button class="today" id="todayBtn" aria-label="Spent today, tap to see today"><small>Today</small><b class="num" id="todayAmt">₹0</b></button>
     </div>
     <section id="home" class="home">
-      <div class="hp1" id="hp1"><div class="gc ringc"><section class="stage" id="stage" aria-label="Spending by category"></section></div>
-        <button type="button" class="hnext" id="hNext" aria-label="Show categories"><svg viewBox="0 0 24 24"><path d="M6 10l6 6 6-6"/></svg>Categories</button></div>
-      <div class="hp2" id="hp2"><div class="gc"><div class="gch"><h3>Categories</h3><span class="muted" id="lgSum"></span></div><div class="legend" id="legend"></div></div>
-      <div class="gc" id="trend"></div>
-      <div class="gc" id="splitsC"></div></div>
+      <div class="hpg hp1" id="hp1"><div class="gc ringc"><section class="stage" id="stage" aria-label="Spending by category"></section></div></div>
+      <div class="hpg" id="hp2"><div class="gc"><div class="gch"><h3>Categories</h3><span class="muted" id="lgSum"></span></div><div class="legend" id="legend"></div></div></div>
+      <div class="hpg" id="hp3"><div class="gc" id="trend"></div></div>
+      <div class="hpg" id="hp4"><div class="gc" id="splitsC"></div></div>
     </section>
     <section id="ledger" class="ledger" hidden></section>
   </main>
@@ -1035,7 +1039,7 @@ function drawChart(rows){
   svg+=`<circle cx="${RG.cx}" cy="${RG.cy}" r="${RG.r}" fill="none" stroke="var(--track)" stroke-width="${RG.w}"/><path class="halo" id="halo" fill="none" stroke-width="56"/>`;
   sl.forEach((g,i)=>{ const span=g.a1-g.a0; if(span<.2) return; const gap=sl.length>1?Math.min(.9,span/3):0;
     const m=(g.a0+g.a1)/2*Math.PI/180, lift=span>300?0:6;
-    svg+=`<path class="seg" data-i="${i}" style="--lx:${(Math.sin(m)*lift).toFixed(2)}px;--ly:${(-Math.cos(m)*lift).toFixed(2)}px" d="${arcR(g.a0+gap,g.a1-gap)}" fill="none" stroke="${catMeta(g.c)[1]}" stroke-width="${RG.w}" pathLength="1"/>`; });
+    svg+=`<path class="seg" data-i="${i}" style="--d:${(g.a0/360*.5).toFixed(3)}s;--lx:${(Math.sin(m)*lift).toFixed(2)}px;--ly:${(-Math.cos(m)*lift).toFixed(2)}px" d="${arcR(g.a0+gap,g.a1-gap)}" fill="none" stroke="${catMeta(g.c)[1]}" stroke-width="${RG.w}" pathLength="1"/>`; });
   svg+=`<g id="ctrG"><g id="cIco" transform="translate(138 70)" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></g>`;
   svg+=`<text class="ctr-l" id="cL" x="150" y="122" text-anchor="middle">SPENT</text>`;
   svg+=`<text class="ctr-v num" id="cV" x="150" y="156" text-anchor="middle">${inr(total)}</text>`;
@@ -1043,7 +1047,7 @@ function drawChart(rows){
   svg+=`<text class="ctr-d" id="cD" x="150" y="202" text-anchor="middle"></text></g></svg>`;
   const st=document.getElementById('stage'); st.innerHTML=svg+`<button type="button" class="ctrbtn" id="ctrBtn" aria-label="Open this category"></button>`;
   const el=st.firstChild; el.style.setProperty('--dx',(lastDir*-24)+'px'); el.classList.add('in'); lastDir=0;
-  const key=label(S.mode,S.anchor)+'|'+total+'|'+sl.length; if(key!==drawChart.key){ drawChart.key=key; if(!LOADING) el.classList.add('draw'); }
+  const key=label(S.mode,S.anchor)+'|'+total+'|'+sl.length; if(key!==drawChart.key){ drawChart.key=key; if(total) el.classList.add('draw'); }
   showCenter(-1);
   /* legend: every category, biggest first; the first six show, the rest behind "Show all" */
   document.getElementById('lgSum').textContent=total?inr(total):"";
@@ -1258,38 +1262,42 @@ document.getElementById('cBack').onclick=()=>ovClose(hideCat);
 (()=>{ let x0=null,y0=0; cSheet.addEventListener('touchstart',e=>{ x0=e.touches[0].clientX<28?e.touches[0].clientX:null; y0=e.touches[0].clientY; },{passive:true});   /* swipe from the left edge goes back */
   cSheet.addEventListener('touchend',e=>{ if(x0!=null&&e.changedTouches[0].clientX-x0>70&&Math.abs(e.changedTouches[0].clientY-y0)<60) ovClose(hideCat); x0=null; },{passive:true}); })();
 
-/* ---------- home in two pages: the ring alone fills the first screen; swipe up about a third of the way and the categories page comes up,
-   swipe down about a third from there and the ring comes back. A quick flick goes the way it was flicked. Below the top of page 2 it scrolls freely. ---------- */
-var HP={P:0,anim:0,busy:false};
+/* ---------- home in pages: the ring alone fills the first screen, then the categories, spending by day, and who paid — one page each.
+   Swipe about a third of the way and the next (or previous) page comes up; less springs back; a quick flick goes the way it was flicked.
+   A page taller than the screen scrolls freely until its end. ---------- */
+var HP={tops:[],ends:[],anim:0,busy:false,H:0};
 function hpOn(){ return S.view!=="list"&&!document.getElementById('home').hidden&&!document.body.classList.contains('dopen'); }
-function hpSize(){ const p1=document.getElementById('hp1'), p2=document.getElementById('hp2'); if(!p1||!hpOn()) return;
-  const hd=document.querySelector('header.top'), dk=document.querySelector('.dock .in'), H=innerHeight;
+function hpSize(){ const p1=document.getElementById('hp1'); if(!p1||!hpOn()) return;
+  const home=document.getElementById('home'); if(home.style.transform){ setTimeout(hpSize,120); return; }   // a period is sliding in: measure once it has settled
+  const hd=document.querySelector('header.top'), dk=document.querySelector('.dock .in'), H=document.documentElement.clientHeight;
   const hh=hd?hd.getBoundingClientRect().height:0, dh=dk?Math.max(0,H-dk.getBoundingClientRect().top):0, top=p1.getBoundingClientRect().top+scrollY;
-  const h=Math.max(320,Math.round(H-dh-top-4)); p1.style.setProperty('--p1h',h+'px');
+  const h=Math.max(320,Math.round(H-dh-top)); p1.style.setProperty('--p1h',h+'px');
   p1.style.setProperty('--rs',Math.round(Math.max(230,Math.min(p1.clientWidth+24,h-40)))+'px');
-  p2.style.minHeight=Math.round(H-hh)+'px';
-  HP.P=Math.max(0,Math.round(p2.getBoundingClientRect().top+scrollY-hh-2)); }
+  const avail=H-hh-dh, pages=[...home.querySelectorAll('.hpg')].filter(n=>!n.hidden);
+  pages.forEach((n,i)=>{ if(i) n.style.minHeight=Math.round(avail)+'px'; });
+  HP.tops=[]; HP.ends=[]; HP.H=H;
+  pages.forEach((n,i)=>{ const r=n.getBoundingClientRect(), t=i?Math.max(0,Math.round(r.top+scrollY-hh-2)):0; HP.tops.push(t); HP.ends.push(t+Math.max(0,Math.round(r.height-(i?avail:H-top-dh)))); });
+  HP.P=HP.tops[1]||0; }
 function hpGo(t){ cancelAnimationFrame(HP.anim); const y0=scrollY, d=t-y0; if(Math.abs(d)<2){ HP.busy=false; return; }
   if(still()){ scrollTo(0,t); HP.busy=false; return; }
-  HP.busy=true; const t0=performance.now(), D=Math.min(460,240+Math.abs(d)*.35);
+  HP.busy=true; const t0=performance.now(), D=Math.min(480,260+Math.abs(d)*.3);
   const step=now=>{ const k=Math.min(1,(now-t0)/D), e=1-Math.pow(1-k,3); scrollTo(0,Math.round(y0+d*e)); if(k<1) HP.anim=requestAnimationFrame(step); else HP.busy=false; };
   HP.anim=requestAnimationFrame(step); }
+/* the gap between the end of one page and the top of the next that y is in (null if y is inside a page) */
+function hpGap(y){ for(let k=0;k<HP.tops.length-1;k++){ const lo=HP.ends[k], hi=HP.tops[k+1]; if(hi-lo>4&&y>lo+1&&y<hi-1) return [lo,hi]; } return null; }
 (()=>{ let s0=null, ys=[], idle=0;
   const skip=e=>e.target.closest&&e.target.closest('.add,.sheet,.drawer,.esheet,.csheet,.gate,.upd,.yay');
-  /* where to land, given where the touch began (s0), where it is now (y) and how fast it was moving (v, px per ms, + is down the page) */
-  const pick=(s0,y,v)=>{ const P=HP.P; if(Math.abs(v)>.45) return v>0?P:0; return s0<P*.5?(y>P*.33?P:0):(y<P*.67?0:P); };
   addEventListener('touchstart',e=>{ cancelAnimationFrame(HP.anim); HP.busy=false; s0=null; ys=[];
     if(e.touches.length!==1||!hpOn()||skip(e)) return; hpSize(); s0=scrollY; },{passive:true});
   addEventListener('touchmove',()=>{ if(s0==null) return; const n=performance.now(); ys.push([n,scrollY]); while(ys.length>2&&n-ys[0][0]>90) ys.shift(); },{passive:true});
-  addEventListener('touchend',e=>{ if(s0==null||e.touches.length) return; const a=s0, y=scrollY; s0=null; const P=HP.P;
-    if(!P||Math.abs(y-a)<3) return; if(a>=P-2&&y>=P-2) return;          // free scrolling within page 2
+  addEventListener('touchend',e=>{ if(s0==null||e.touches.length) return; const a=s0, y=scrollY; s0=null;
     let v=0; if(ys.length>1){ const [t1,y1]=ys[0],[t2,y2]=ys[ys.length-1]; if(t2-t1>8) v=(y2-y1)/(t2-t1); } ys=[];
-    if(y>P&&v>0) return;                                                   // flung on past the top of page 2: let it run
-    hpGo(pick(a,y,v)); },{passive:true});
-  /* a mouse wheel or a fling that ends half-way: settle on the nearer page */
-  addEventListener('scroll',()=>{ clearTimeout(idle); if(HP.busy||s0!=null) return; idle=setTimeout(()=>{ const P=HP.P, y=scrollY; if(!HP.busy&&s0==null&&hpOn()&&P&&y>2&&y<P-2) hpGo(y>P*.5?P:0); },180); },{passive:true});
+    if(Math.abs(y-a)<3) return; const g=hpGap(y); if(!g) return;   // inside a page: scroll on freely
+    const [lo,hi]=g, third=(hi-lo)*.33, down=a<=lo+2?true:a>=hi-2?false:y>a;
+    hpGo(Math.abs(v)>.45?(v>0?hi:lo):down?(y>lo+third?hi:lo):(y<hi-third?lo:hi)); },{passive:true});
+  /* a mouse wheel or a fling that ends between pages: settle on the nearer one */
+  addEventListener('scroll',()=>{ clearTimeout(idle); if(HP.busy||s0!=null) return; idle=setTimeout(()=>{ if(HP.busy||s0!=null||!hpOn()) return; const g=hpGap(scrollY); if(g) hpGo(scrollY>(g[0]+g[1])/2?g[1]:g[0]); },180); },{passive:true});
   addEventListener('resize',()=>{ hpSize(); },{passive:true});
-  document.getElementById('hNext').onclick=()=>{ hpSize(); hpGo(HP.P); };
 })();
 
 /* ---------- render ---------- */
@@ -1307,7 +1315,7 @@ function render(){
   document.getElementById('listL').setAttribute('aria-pressed',String(list)); document.getElementById('viewRing').setAttribute('aria-pressed',String(!list));
   { const t=isoDay(today()); const v=filtered(false).filter(r=>r.iso===t).reduce((s,r)=>s+r.a,0); document.getElementById('todayAmt').textContent=inr(v); }
   if(list){ drawLedger(rows); lastDir=0; }
-  else { drawChart(rows); drawTrend(document.getElementById('trend'),rows); const sp=document.getElementById('splitsC'), h=splitsHTML(rows); sp.innerHTML=h?`<div class="gch"><h3>Who paid, and for what</h3></div>`+h:""; sp.hidden=!h; requestAnimationFrame(hpSize); }
+  else { drawChart(rows); drawTrend(document.getElementById('trend'),rows); const sp=document.getElementById('splitsC'), h=splitsHTML(rows); sp.innerHTML=h?`<div class="gch"><h3>Who paid, and for what</h3></div>`+h:""; sp.hidden=!h; document.getElementById('hp4').hidden=!h; requestAnimationFrame(hpSize); }
   if(CAT) drawCat();
 }
 function go(dir){ if(S.mode==="all") return; lastDir=dir; if(S.mode==="interval") shiftInterval(dir); else S.anchor=shift(S.mode,S.anchor,dir); S.open.clear(); drawChart.all=false; LDAYS=40; render(); }
@@ -1323,7 +1331,7 @@ const PAGER=(()=>{ const zone=document, title=document.getElementById('curBtn');
     if(el) el.style.opacity=x?String(1-Math.min(.6,Math.abs(x)/innerWidth*.9)):''; };
   function flip(dir){ if(busy||S.mode==="all") return; busy=true; el=cur(); const W=Math.min(innerWidth,520);
     if(RM_.matches){ go(dir); busy=false; return; }
-    set(-dir*W,170); setTimeout(()=>{ go(dir); el=cur(); set(dir*W*.45,0); void el.offsetWidth; requestAnimationFrame(()=>{ set(0,280); setTimeout(()=>{ el&&(el.style.transition='',el.style.opacity=''); title.style.transition=''; busy=false; },300); }); },175); }
+    set(-dir*W,170); setTimeout(()=>{ go(dir); el=cur(); set(dir*W*.45,0); void el.offsetWidth; requestAnimationFrame(()=>{ set(0,280); setTimeout(()=>{ el&&(el.style.transition='',el.style.opacity=''); title.style.transition=''; busy=false; hpSize(); },300); }); },175); }
   zone.addEventListener('touchstart',e=>{ x0=null; if(busy||e.touches.length>1||RINGTOUCH||!e.target.closest||!e.target.closest('.app')||e.target.closest('.txw,svg.bars,input,textarea,.dock')||document.body.classList.contains('dopen')) return;
     x0=e.touches[0].clientX; y0=e.touches[0].clientY; dx=0; mode=0; t0=performance.now(); },{passive:true});
   /* sideways wins up to ~55° from flat, so a loose diagonal swipe still turns the page; once sideways the page stops scrolling */
@@ -1681,18 +1689,21 @@ function catSums(c,iso){ const ym=String(iso||"").slice(0,7), yr=ym.slice(0,4); 
    Stays about 5 seconds (a line runs down), never blocks a touch, and the next touch sends it away. */
 function saved(amt,label,iso,o){ o=o||{}; if(navigator.vibrate) navigator.vibrate([10,40,16]);
   document.querySelectorAll(".yay").forEach(n=>n.remove()); clearTimeout(saved.t1); clearTimeout(saved.t2);
-  const ym=String(iso||"").slice(0,7), mi=+ym.slice(5,7)-1, yr=ym.slice(0,4), cat=o.cat||label, b=o.before||{m:0,y:0}, a=o.after||catSums(cat,iso), MS=5200;
+  const ym=String(iso||"").slice(0,7), mi=+ym.slice(5,7)-1, yr=ym.slice(0,4), cat=o.cat||label, b=o.before||{m:0,y:0}, a=o.after||catSums(cat,iso), MS=3800;
+  const now=new Date(), thisM=+yr===now.getFullYear()&&mi===now.getMonth(), thisY=+yr===now.getFullYear();
+  const dl=x=>x>0?`+${inr(x)}`:x<0?`−${inr(-x)}`:"no change";
+  const tile=(id,top,sub,v0,d)=>`<span><small>${esc(top)}</small><b class="num" id="${id}">${esc(inr(v0))}</b><em>${esc(sub)}</em><i class="ydl ${d>0?"up":d<0?"dn":""}">${esc(dl(d))}</i></span>`;
   const y=document.createElement("div"); y.className="yay"+(o.edited?" ed":""); y.setAttribute("role","status"); y.style.setProperty("--yms",MS+"ms");
   y.innerHTML=`<div class="yhd"><span class="tick"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
       <div class="yt"><small>${o.edited?"Updated":"Saved"}</small><span class="yamt" id="yAmt">${esc(inr(o.edited?amt:0))}</span><b>${esc(label)}</b></div></div>
-    <div class="ycap">Spent on ${esc(cat)}</div>
-    <div class="ystats"><span><small>In ${esc(MONL[mi]||"this month")}</small><b class="num" id="yMon">${esc(inr(b.m))}</b></span><span><small>In ${esc(yr||"this year")}</small><b class="num" id="yYr">${esc(inr(b.y))}</b></span></div>
+    <div class="ycap">Total spent on <b>${esc(cat)}</b> so far</div>
+    <div class="ystats">${tile("yMon",thisM?"This month":"In "+(MONL[mi]||""),(MONL[mi]||"")+" "+yr,b.m,a.m-b.m)}${tile("yYr",thisY?"This year":"In "+yr,"Jan – "+(thisY?MON[now.getMonth()]:"Dec")+" "+yr,b.y,a.y-b.y)}</div>
     <i class="ybar"></i>`;
   document.body.appendChild(y);
   let gone=false; const bye=()=>{ if(gone) return; gone=true; removeEventListener("pointerdown",bye,true); y.classList.add("bye"); setTimeout(()=>y.remove(),360); };
   saved.t1=setTimeout(bye,MS); saved.t2=setTimeout(()=>{ if(!gone) addEventListener("pointerdown",bye,true); },700);
-  if(!o.edited) countUp(document.getElementById("yAmt"),0,amt,650,inr);
-  setTimeout(()=>{ countUp(document.getElementById("yMon"),b.m,a.m,850,inr); countUp(document.getElementById("yYr"),b.y,a.y,950,inr); },420);
+  if(!o.edited) countUp(document.getElementById("yAmt"),0,amt,600,inr);
+  setTimeout(()=>{ countUp(document.getElementById("yMon"),b.m,a.m,800,inr); countUp(document.getElementById("yYr"),b.y,a.y,900,inr); },350);
   if(!still()){ BGK.kick(2); const st=document.getElementById("stage"); st.classList.remove("swell"); void st.offsetWidth; st.classList.add("swell"); } }
 /* the background of the Artha look: a floor grid running to the horizon and line-art objects drifting at three depths.
    Plain 2D canvas (no library), about 30 frames a second, asleep whenever the app is hidden, another theme is chosen or motion is off. */
@@ -1740,7 +1751,7 @@ const BGK=(()=>{ const c=document.getElementById("bgk"), g=c.getContext("2d"); l
   wake();
   return {kick(k){ boost=Math.min(2.4,boost+k); },wake,on:()=>run}; })();
 /* updates: a banner when a new version is published */
-const APP_VERSION="2.10";
+const APP_VERSION="2.11";
 document.getElementById('verTxt').textContent="Version "+APP_VERSION;
 /* update card: never pops over an open sheet, the add screen or while typing; waits until you're back on the main screen */
 let UPD=null, updT=0; const $u=id=>document.getElementById(id);

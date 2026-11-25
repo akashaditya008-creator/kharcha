@@ -111,10 +111,10 @@ else:
         pg.evaluate("[...document.querySelectorAll('.card')].filter(c=>c.offsetParent&&/Eating|Transport|Bills/.test(c.innerText))[0].click()"); pg.wait_for_timeout(1700)
         y = pg.evaluate("(document.querySelector('.yay')||{}).innerText||''")
         mon = datetime.date.today().strftime("%B"); yr = str(datetime.date.today().year)
-        ok("₹450" in y and "saved" in y.lower() and "In " + mon in y and "In " + yr in y, "saving an expense shows the saved card with the category's month and year totals (" + y.replace("\n", " · ")[:90] + ")")
+        ok("₹450" in y and "saved" in y.lower() and "This month" in y and "This year" in y and "+₹450" in y, "saving an expense shows the saved card with the category's month and year totals (" + y.replace("\n", " · ")[:90] + ")")
         ok(pg.evaluate("document.querySelector('.yay').getBoundingClientRect().width") >= 330, "the saved card is big")
-        pg.wait_for_timeout(2600)
-        ok(pg.evaluate("!!document.querySelector('.yay')&&!document.querySelector('.yay.bye')"), "the saved card is still up after 4 seconds")
+        pg.wait_for_timeout(1300)
+        ok(pg.evaluate("!!document.querySelector('.yay')&&!document.querySelector('.yay.bye')"), "the saved card is still up after 3 seconds")
         ok(pg.evaluate("getComputedStyle(document.querySelector('.yay')).pointerEvents") == "none", "the saved moment lets touches through")
         pg.evaluate("dispatchEvent(new PointerEvent('pointerdown',{bubbles:true,clientX:5,clientY:300}))"); pg.wait_for_timeout(600)
         ok(pg.evaluate("!document.querySelector('.yay')"), "the next touch sends the saved moment away")
@@ -182,6 +182,12 @@ else:
         # 2.10: the ring alone on the first page, the categories one swipe up; the same card after an edit
         ok(pg.evaluate("document.querySelector('#stage svg').getBoundingClientRect().width") > 320, "the ring is bigger")
         ok(pg.evaluate("document.getElementById('hp2').getBoundingClientRect().top>=document.querySelector('.dock .in').getBoundingClientRect().top-2"), "the categories start below the first screen")
+        ok(pg.evaluate("!document.getElementById('hNext')"), "no Categories hint on the first screen")
+        ok(pg.evaluate("(()=>{const a=document.getElementById('hp2').getBoundingClientRect(),b=document.getElementById('hp3').getBoundingClientRect(),c=document.getElementById('hp4');return b.top-a.top>=innerHeight*.6&&(c.hidden||c.getBoundingClientRect().top-b.top>=innerHeight*.6)})()"), "spending by day and who paid each have their own page")
+        ok(pg.evaluate("document.querySelectorAll('#stage svg.draw .seg').length>0&&getComputedStyle(document.querySelector('#stage svg .seg')).animationName==='segdraw'"), "the ring sweeps in")
+        pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(1200)
+        ok(pg.evaluate("document.getElementById('hp1').getBoundingClientRect().bottom<=document.querySelector('.dock .in').getBoundingClientRect().top+8"), "after moving to another month the first page still fits above the dock (ring not pushed down)")
+        pg.keyboard.press("ArrowLeft"); pg.wait_for_timeout(1200)
         SW = """(f)=>{const t=document.getElementById('hp1'),P=HPX();const T=y=>new Touch({identifier:3,target:t,clientX:200,clientY:y});
           t.dispatchEvent(new TouchEvent('touchstart',{bubbles:true,touches:[T(600)],changedTouches:[T(600)]}));
           return new Promise(res=>{let i=0;const k=()=>{i++;scrollTo(0,Math.round(P*f*i/6));t.dispatchEvent(new TouchEvent('touchmove',{bubbles:true,touches:[T(600-i)],changedTouches:[T(600-i)]}));
@@ -200,7 +206,7 @@ else:
         pg.click("#aChoose"); pg.wait_for_timeout(500)
         pg.evaluate("[...document.querySelectorAll('.card')].filter(c=>c.offsetParent&&/Eating/.test(c.innerText))[0].click()"); pg.wait_for_timeout(1700)
         y = pg.evaluate("(document.querySelector('.yay')||{}).innerText||''")
-        ok("updated" in y.lower() and "₹700" in y and "In " + mon in y, "updating an expense shows the same card with the new totals (" + y.replace("\n", " · ")[:90] + ")")
+        ok("updated" in y.lower() and "₹700" in y and "This month" in y, "updating an expense shows the same card with the new totals (" + y.replace("\n", " · ")[:90] + ")")
         ok(not errs, "no JavaScript errors in the 2.7 screens" + ("" if not errs else ": " + errs[0][:160]))
         ok(not errs, "no JavaScript errors signed in" + ("" if not errs else ": " + errs[0][:160]))
         pg.screenshot(path=os.path.join(os.environ.get("CHECK_OUT", tempfile.gettempdir()), "kharcha-signed-in.png"))
