@@ -1,5 +1,5 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JDgtvwqonQSJcprhWAkzWZXJ9vykRf2wa9Jgqc1UMqw=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-e9Hhhd3nVY5cu/bWmxGsY6KGVV0Q5JUZor1470bsD+A=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-JDgtvwqonQSJcprhWAkzWZXJ9vykRf2wa9Jgqc1UMqw=' 'sha256-W/P3/YVFWk+zzpNrDjyjKbrOlzslzqVvfmJ1Nh35jL0=' 'sha256-BaK1uGeFGNi93BxbDGu3MTfuwGJfMJRq2csfY3RqHLU=' https://accounts.google.com/gsi/client; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com/gsi/style; font-src https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://accounts.google.com/gsi/; frame-src https://accounts.google.com/gsi/; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>try{var s=JSON.parse(localStorage.getItem("acx:skin")||"\"\"");if(!localStorage.getItem("acx:deck26"))s="deck";if(s)document.documentElement.setAttribute("data-skin",s);}catch(e){}
 /* the font is fetched without holding up the first paint (the phone font shows until it arrives) */
@@ -720,7 +720,7 @@ body.dopen{overflow:hidden}
 .hist button.cur{background:color-mix(in srgb,var(--tint) 16%,transparent);box-shadow:inset 0 0 0 1.5px var(--tint)}
 .kpis b.up{color:var(--spend)} .kpis b.down{color:var(--ok)}
 /* 3.0: home in two pages — the big ring on its own, then (swipe up) the categories */
-.hp1{display:flex;flex-direction:column;min-height:var(--p1h,auto)}
+.hp1{display:flex;flex-direction:column}
 .hp1 .ringc{flex:1;display:grid;place-items:center;padding:2px;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;background:radial-gradient(circle at 50% 52%,color-mix(in srgb,var(--tint) 9%,transparent),transparent 62%),color-mix(in srgb,var(--surface) 88%,transparent);box-shadow:0 0 0 .5px color-mix(in srgb,var(--line) 55%,transparent);-webkit-backdrop-filter:none;backdrop-filter:none}
 .hpg:not(.hp1){display:flow-root}
 html,body{overflow-x:clip}
@@ -763,12 +763,12 @@ html,body{overflow-x:clip}
 .cfilt{display:flex;align-items:center;gap:8px;margin:10px 0 0;padding:8px 10px 8px 14px;border-radius:999px;font:500 13.5px var(--body);color:var(--ink);background:color-mix(in srgb,var(--tint) 14%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--tint) 35%,transparent)}
 .cfilt svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
 /* 2.12: the spending page fills the screen */
-#hp3{display:flex;flex-direction:column} #hp3>.gc{flex:1;display:flex;flex-direction:column}
+#hp3>.gc{display:flex;flex-direction:column}
 .tkpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:4px 0 14px}
 .tkpi span{display:grid;gap:3px;padding:11px 10px;border-radius:14px;background:color-mix(in srgb,var(--tint) 8%,transparent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--tint) 18%,transparent);min-width:0}
 .tkpi b{font:700 18px var(--display);letter-spacing:-.02em;white-space:nowrap}
 .tkpi small{font-size:11.5px;color:var(--muted);line-height:1.25}
-.tchart{flex:1;display:flex;align-items:center;min-height:200px}
+.tchart{display:flex;align-items:center}
 svg.bars.big rect.b:not(.ghost){fill:url(#tbg)}
 svg.bars.big rect.b.now:not(.ghost){fill:var(--tint)}
 svg.bars.big .grid{stroke:var(--line);stroke-width:1}
@@ -1093,7 +1093,7 @@ function showCenter(i){ const g=HOME.sl[i], st=document.getElementById('stage'),
   const $c=id=>document.getElementById(id), ico=$c('cIco'), btn=$c('ctrBtn');
   if(g){ const col=catMeta(g.c)[1]; ico.setAttribute('stroke',col); ico.innerHTML=`<path d="${P[catMeta(g.c)[0]]}"${catMeta(g.c)[0]==='dots'?' stroke-width="3"':''}/>`;
     $c('cL').textContent=g.c.toUpperCase(); $c('cL').setAttribute('fill',col); $c('cV').textContent=inr(g.sum);
-    $c('cS').textContent=`${pctTxt(g.sum,HOME.total)} · ${g.n} ${g.n===1?"entry":"entries"}`; $c('cD').textContent="Tap to open ›"; $c('cD').setAttribute('class','ctr-d go');
+    $c('cS').textContent=`${pctTxt(g.sum,HOME.total)} · ${g.n} ${g.n===1?"entry":"entries"}`; $c('cD').textContent="Double-tap to open ›"; $c('cD').setAttribute('class','ctr-d go');
     btn.hidden=false; btn.setAttribute('aria-label',`Open ${g.c}`); }
   else { ico.innerHTML=""; $c('cL').textContent="SPENT"; $c('cL').removeAttribute('fill'); $c('cV').textContent=inr(HOME.total);
     $c('cS').textContent=HOME.n?`${HOME.n.toLocaleString('en-IN')} ${HOME.n===1?"entry":"entries"}`:(LOADING?"Loading…":"Nothing here yet");
@@ -1112,23 +1112,31 @@ function wireRing(svg){ let raf=0, t=null;
   const buzz=ms=>{ try{navigator.vibrate&&navigator.vibrate(ms);}catch(_){} };
   const rest=()=>{ svg.classList.remove('held'); showCenter(HOME.pin); };
   const stop=()=>{ if(!t) return; clearTimeout(t.timer); if(t.lp){ RINGTOUCH=false; rest(); } t=null; };
-  /* long press anywhere on the ring panel (the ring, its middle or around it), then slide sideways with the finger anywhere on screen:
-     every ~38 px to the right shows the next category round the ring, to the left the one before. The middle stays readable.
+  /* long press anywhere on the ring panel, then move the finger round the ring like a dial — on the band or well outside it, so the
+     middle stays readable. The category in the finger's direction shows: move left for the ones on the left, right for the ones on
+     the right, round and round to go through them all (further out = finer control for the thin slices).
      Letting go returns to the tapped slice (or none). A quick swipe without the press still changes the period. */
-  const zone=svg.closest('.ringc')||svg, STEP=38; if(zone._ac) zone._ac.abort(); const ac=zone._ac=new AbortController(), on={signal:ac.signal};
+  const zone=svg.closest('.ringc')||svg; if(zone._ac) zone._ac.abort(); const ac=zone._ac=new AbortController(), on={signal:ac.signal};
+  const dirOf=(x,y)=>{ const r=svg.getBoundingClientRect(), cx=r.left+r.width/2, cy=r.top+r.height*.5, dx=x-cx, dy=(y-cy)/.94;
+    return {d:Math.hypot(dx,dy), ang:(Math.atan2(dx,-dy)*180/Math.PI+360)%360}; };
   zone.addEventListener('touchstart',e=>{ stop(); if(e.touches.length!==1||!HOME.sl.length) return; const p=e.touches[0], i=pick(p);
     const i0=i!=null?i:HOME.pin>=0?HOME.pin:0;
     t={x0:p.clientX,y0:p.clientY,x:p.clientX,y:p.clientY,lp:false,i0,cur:i0};
-    t.timer=setTimeout(()=>{ if(!t) return; t.lp=true; t.ax=t.x; RINGTOUCH=true; svg.classList.add('held'); showCenter(t.i0); buzz(8); },380); },{passive:true,...on});
+    t.timer=setTimeout(()=>{ if(!t) return; t.lp=true; RINGTOUCH=true; svg.classList.add('held'); showCenter(t.i0); buzz(8); },380); },{passive:true,...on});
   zone.addEventListener('touchmove',e=>{ if(!t) return; const p=e.touches[0]; t.x=p.clientX; t.y=p.clientY;
     if(t.lp){ if(e.cancelable) e.preventDefault(); if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; if(!t) return;
-        const k=Math.max(0,Math.min(HOME.sl.length-1,t.i0+Math.trunc((t.x-t.ax)/STEP))); if(k!==t.cur){ t.cur=k; showCenter(k); buzz(4); } }); return; }
+        const {d,ang}=dirOf(t.x,t.y); if(d<34) return;   // too near the middle to tell a direction
+        let k=HOME.sl.findIndex(g=>ang>=g.a0&&ang<g.a1); if(k<0) k=HOME.sl.length-1;
+        if(k!==t.cur){ t.cur=k; showCenter(k); buzz(4); } }); return; }
     if(Math.hypot(t.x-t.x0,t.y-t.y0)>9){ clearTimeout(t.timer); t=null; } },{passive:false,...on});
   zone.addEventListener('touchend',e=>{ if(t&&t.lp&&e.cancelable) e.preventDefault(); stop(); },on);   // no click after a long press
   zone.addEventListener('touchcancel',stop,on);
   zone.addEventListener('contextmenu',e=>e.preventDefault(),on);
   /* a tap (finger or mouse) */
-  svg.addEventListener('click',e=>{ const i=pick(e);
+  /* a tap picks a slice (again clears it); a double tap on a slice, or on the middle, opens that category */
+  let lastTap={i:-2,at:0};
+  svg.addEventListener('click',e=>{ const i=pick(e), now=Date.now(), dbl=i!=null&&lastTap.i===i&&now-lastTap.at<380; lastTap={i:i==null?-2:i,at:now};
+    if(dbl){ HOME.pin=i; showCenter(i); lastTap={i:-2,at:0}; openCat(HOME.sl[i].c); return; }
     if(i!=null){ HOME.pin=HOME.pin===i?-1:i; showCenter(HOME.pin); }
     else if(at(e).d>=RG.r-RG.w/2-16&&HOME.pin>=0){ HOME.pin=-1; showCenter(-1); } });
   svg.addEventListener('contextmenu',e=>e.preventDefault());
@@ -1137,7 +1145,7 @@ function wireRing(svg){ let raf=0, t=null;
   const cb=document.getElementById('ctrBtn');
   svg.addEventListener('pointerleave',e=>{ if(e.pointerType==="mouse"&&e.relatedTarget!==cb) showCenter(HOME.pin); });
   cb.addEventListener('pointerleave',e=>{ if(e.pointerType==="mouse"&&e.relatedTarget!==svg&&!svg.contains(e.relatedTarget)) showCenter(HOME.pin); });
-  cb.onclick=()=>{ const g=HOME.sl[HOME.sel]; if(g) openCat(g.c); }; }
+  let cbAt=0; cb.onclick=()=>{ const g=HOME.sl[HOME.sel], now=Date.now(); if(g&&now-cbAt<380){ cbAt=0; openCat(g.c); return; } cbAt=now; }; }
 /* ---------- spending over time: bars for each day (or month), tap or slide across them ---------- */
 const DAYMS=864e5;
 function buckets(rows,mode,anchor){
@@ -1339,10 +1347,10 @@ function hpSize(){ const p1=document.getElementById('hp1'); if(!p1||!hpOn()) ret
   const home=document.getElementById('home'); if(home.style.transform){ setTimeout(hpSize,120); return; }   // a period is sliding in: measure once it has settled
   const hd=document.querySelector('header.top'), dk=document.querySelector('.dock .in'), H=document.documentElement.clientHeight;
   const hh=hd?hd.getBoundingClientRect().height:0, dh=dk?Math.max(0,H-dk.getBoundingClientRect().top):0, top=p1.getBoundingClientRect().top+scrollY;
-  const h=Math.max(320,Math.round(H-dh-top)); p1.style.setProperty('--p1h',h+'px');
+  const h=Math.max(320,Math.round(H-dh-top-12)); p1.style.setProperty('--p1h',h+'px');
   p1.style.setProperty('--rs',Math.round(Math.max(230,Math.min(p1.clientWidth+14,h-24)))+'px');
   const avail=H-hh-dh, pages=[...home.querySelectorAll('.hpg')].filter(n=>!n.hidden);
-  pages.forEach((n,i)=>{ if(i) n.style.minHeight=Math.round(avail)+'px'; });
+
   HP.tops=[]; HP.ends=[]; HP.H=H;
   pages.forEach((n,i)=>{ const r=n.getBoundingClientRect(), t=i?Math.max(0,Math.round(r.top+scrollY-hh-2)):0; HP.tops.push(t); HP.ends.push(t+Math.max(0,Math.round(r.height-(i?avail:H-top-dh)))); });
   HP.P=HP.tops[1]||0; }
@@ -1352,7 +1360,7 @@ function hpGo(t){ cancelAnimationFrame(HP.anim); const y0=scrollY, d=t-y0; if(Ma
   const step=now=>{ const k=Math.min(1,(now-t0)/D), e=1-Math.pow(1-k,3); scrollTo(0,Math.round(y0+d*e)); if(k<1) HP.anim=requestAnimationFrame(step); else HP.busy=false; };
   HP.anim=requestAnimationFrame(step); }
 /* the gap between the end of one page and the top of the next that y is in (null if y is inside a page) */
-function hpGap(y){ for(let k=0;k<HP.tops.length-1;k++){ const lo=HP.ends[k], hi=HP.tops[k+1]; if(hi-lo>4&&y>lo+1&&y<hi-1) return [lo,hi]; } return null; }
+function hpGap(y){ return null; for(let k=0;k<HP.tops.length-1;k++){ const lo=HP.ends[k], hi=HP.tops[k+1]; if(hi-lo>4&&y>lo+1&&y<hi-1) return [lo,hi]; } return null; }
 (()=>{ let s0=null, ys=[], idle=0;
   const skip=e=>e.target.closest&&e.target.closest('.add,.sheet,.drawer,.esheet,.csheet,.gate,.upd,.yay');
   addEventListener('touchstart',e=>{ cancelAnimationFrame(HP.anim); HP.busy=false; s0=null; ys=[];
@@ -1819,7 +1827,7 @@ const BGK=(()=>{ const c=document.getElementById("bgk"), g=c.getContext("2d"); l
   wake();
   return {kick(k){ boost=Math.min(2.4,boost+k); },wake,on:()=>run}; })();
 /* updates: a banner when a new version is published */
-const APP_VERSION="2.13";
+const APP_VERSION="2.14";
 document.getElementById('verTxt').textContent="Version "+APP_VERSION;
 /* update card: never pops over an open sheet, the add screen or while typing; waits until you're back on the main screen */
 let UPD=null, updT=0; const $u=id=>document.getElementById(id);

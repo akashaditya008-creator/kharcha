@@ -176,14 +176,25 @@ else:
           const T=(x,y)=>new Touch({identifier:9,target:n,clientX:x,clientY:y}); n.dispatchEvent(new TouchEvent(kind,{bubbles:true,cancelable:true,touches:kind==='touchend'?[]:[T(x,y)],changedTouches:[T(x,y)]}));}"""
         cx, cy = pg.evaluate("(()=>{const r=document.querySelector('#stage svg').getBoundingClientRect();return [r.left+r.width/2,r.top+r.height/2]})()")
         nseg = pg.evaluate("document.querySelectorAll('#stage svg .seg').length")
+        ang = pg.evaluate("(()=>{const out=[];const s=document.querySelector('#stage svg');for(let a=0;a<360;a+=2){const r=s.getBoundingClientRect(),k=r.width/300,t=(a-90)*Math.PI/180;const e=document.elementFromPoint(r.left+(150+116*Math.cos(t))*k,r.top+(150+116*Math.sin(t))*k);if(e&&e.classList.contains('seg'))out.push([a,+e.dataset.i]);}return out})()")
+        def far(i):
+            import math
+            aa = [a for a, k in ang if k == i]; a = (aa[len(aa)//2] - 90) * math.pi / 180
+            return cx + 230*math.cos(a), cy + 230*math.sin(a)
         pg.evaluate(f"({SC})('touchstart',{cx},{cy})"); pg.wait_for_timeout(520)
         a0 = pg.evaluate("(document.querySelector('#stage svg .seg.on')?+document.querySelector('#stage svg .seg.on').dataset.i:-1)")
-        pg.evaluate(f"({SC})('touchmove',{cx+45},{cy+150})"); pg.wait_for_timeout(120)
+        x1, y1 = far(1); pg.evaluate(f"({SC})('touchmove',{x1},{y1})"); pg.wait_for_timeout(150)
         a1 = pg.evaluate("(document.querySelector('#stage svg .seg.on')?+document.querySelector('#stage svg .seg.on').dataset.i:-1)")
-        pg.evaluate(f"({SC})('touchmove',{cx+10},{cy+150})"); pg.wait_for_timeout(120)
+        x2, y2 = far(0); pg.evaluate(f"({SC})('touchmove',{x2},{y2})"); pg.wait_for_timeout(150)
         a2 = pg.evaluate("(document.querySelector('#stage svg .seg.on')?+document.querySelector('#stage svg .seg.on').dataset.i:-1)")
-        pg.evaluate(f"({SC})('touchend',{cx+10},{cy+150})"); pg.wait_for_timeout(300)
-        ok(a0 == 0 and (a1 == 1 or nseg < 2) and a2 == 0 and pg.evaluate("document.getElementById('ptr').classList.contains('busy')") is False, f"a long press in the middle, then sliding right and back, steps through the categories ({a0}→{a1}→{a2})")
+        pg.evaluate(f"({SC})('touchend',{x2},{y2})"); pg.wait_for_timeout(300)
+        ok(a0 == 0 and a1 == 1 and a2 == 0 and not pg.evaluate("document.getElementById('ptr').classList.contains('busy')"), f"a long press, then moving the finger round the ring (well outside it), goes through the categories ({a0}→{a1}→{a2})")
+        pg.mouse.click(x, y); pg.wait_for_timeout(120); pg.mouse.click(x, y); pg.wait_for_timeout(700)
+        ok(pg.evaluate("!document.getElementById('cSheet').hidden"), "a double tap on a slice opens its category")
+        pg.evaluate("history.back()"); pg.wait_for_timeout(500)
+        pg.mouse.click(x, y); pg.wait_for_timeout(600)
+        ok(pg.evaluate("document.getElementById('cSheet').hidden"), "a single tap does not open the category")
+        pg.mouse.click(x, y); pg.wait_for_timeout(450)
         pg.evaluate("[...document.querySelectorAll('#legend .lrow')][0].click()"); pg.wait_for_timeout(600)
         ok(pg.evaluate("document.querySelector('.ctabs [data-t=list]').getAttribute('aria-selected')==='true'&&document.querySelectorAll('#cBody .txw').length>0&&!/Where it went\\n/.test(document.querySelector('#cBody').innerText.replace(/Where it went · trend/,''))"), "a category opens on its entries, with the breakdown in the other tab")
         pg.evaluate("document.querySelector('.ctabs [data-t=where]').click()"); pg.wait_for_timeout(400)
@@ -193,24 +204,14 @@ else:
         pg.evaluate("history.back()"); pg.wait_for_timeout(400)
         # 2.10: the ring alone on the first page, the categories one swipe up; the same card after an edit
         ok(pg.evaluate("document.querySelector('#stage svg').getBoundingClientRect().width") > 320, "the ring is bigger")
-        ok(pg.evaluate("document.getElementById('hp2').getBoundingClientRect().top>=document.querySelector('.dock .in').getBoundingClientRect().top-2"), "the categories start below the first screen")
+        ok(pg.evaluate("document.getElementById('hp2').getBoundingClientRect().top-document.getElementById('hp1').getBoundingClientRect().bottom<30&&document.getElementById('hp3').getBoundingClientRect().top-document.getElementById('hp2').getBoundingClientRect().bottom<30"), "home is one continuous page (ring, categories, spending by day)")
         ok(pg.evaluate("!document.getElementById('hNext')"), "no Categories hint on the first screen")
         ok(pg.evaluate("!document.getElementById('lMore')"), "every category is shown (no Show all)")
-        ok(pg.evaluate("(()=>{const p=document.getElementById('hp3'),g=p.querySelector('.gc');return !!g.querySelector('.tkpi')&&!!g.querySelector('svg.bars.big')&&g.getBoundingClientRect().height>=innerHeight*.6})()"), "spending by day fills its own page, with highlights and a tall chart")
-        ok(pg.evaluate("(()=>{const a=document.getElementById('hp2').getBoundingClientRect(),b=document.getElementById('hp3').getBoundingClientRect(),c=document.getElementById('hp4');return b.top-a.top>=innerHeight*.6&&(c.hidden||c.getBoundingClientRect().top-b.top>=innerHeight*.6)})()"), "spending by day and who paid each have their own page")
+        ok(pg.evaluate("(()=>{const p=document.getElementById('hp3'),g=p.querySelector('.gc');return !!g.querySelector('.tkpi')&&!!g.querySelector('svg.bars.big')})()"), "spending by day has highlights and a tall chart")
         ok(pg.evaluate("document.querySelectorAll('#stage svg.draw .seg').length>0&&getComputedStyle(document.querySelector('#stage svg .seg')).animationName==='segdraw'"), "the ring sweeps in")
         pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(1200)
         ok(pg.evaluate("document.getElementById('hp1').getBoundingClientRect().bottom<=document.querySelector('.dock .in').getBoundingClientRect().top+8"), "after moving to another month the first page still fits above the dock (ring not pushed down)")
         pg.keyboard.press("ArrowLeft"); pg.wait_for_timeout(1200)
-        SW = """(f)=>{const t=document.getElementById('hp1'),P=HPX();const T=y=>new Touch({identifier:3,target:t,clientX:200,clientY:y});
-          t.dispatchEvent(new TouchEvent('touchstart',{bubbles:true,touches:[T(600)],changedTouches:[T(600)]}));
-          return new Promise(res=>{let i=0;const k=()=>{i++;scrollTo(0,Math.round(P*f*i/6));t.dispatchEvent(new TouchEvent('touchmove',{bubbles:true,touches:[T(600-i)],changedTouches:[T(600-i)]}));
-            if(i<6) setTimeout(k,60); else setTimeout(()=>{t.dispatchEvent(new TouchEvent('touchend',{bubbles:true,touches:[],changedTouches:[T(590)]}));res(P);},60);};setTimeout(k,60);});}"""
-        pg.evaluate("window.HPX=()=>{const hh=document.querySelector('header.top').getBoundingClientRect().height;return Math.round(document.getElementById('hp2').getBoundingClientRect().top+scrollY-hh-2);}")
-        P = pg.evaluate(f"({SW})(0.2)"); pg.wait_for_timeout(800)
-        ok(pg.evaluate("scrollY") <= 2, f"a short swipe up springs back to the ring (P={P})")
-        pg.evaluate(f"({SW})(0.4)"); pg.wait_for_timeout(800)
-        ok(abs(pg.evaluate("scrollY") - P) <= 3, f"a swipe up of about a third brings up the categories page ({pg.evaluate('scrollY')} of {P})")
         pg.evaluate("scrollTo(0,0)"); pg.wait_for_timeout(300)
         pg.evaluate("[...document.querySelectorAll('#legend .lrow')].find(b=>/Eating/.test(b.innerText)).click()"); pg.wait_for_timeout(600)
         pg.evaluate("document.querySelector('#cBody .txw .tx, #cBody .txw').click()"); pg.wait_for_timeout(500)
