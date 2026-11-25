@@ -183,6 +183,8 @@ else:
         ok(pg.evaluate("document.querySelector('#stage svg').getBoundingClientRect().width") > 320, "the ring is bigger")
         ok(pg.evaluate("document.getElementById('hp2').getBoundingClientRect().top>=document.querySelector('.dock .in').getBoundingClientRect().top-2"), "the categories start below the first screen")
         ok(pg.evaluate("!document.getElementById('hNext')"), "no Categories hint on the first screen")
+        ok(pg.evaluate("!document.getElementById('lMore')"), "every category is shown (no Show all)")
+        ok(pg.evaluate("(()=>{const p=document.getElementById('hp3'),g=p.querySelector('.gc');return !!g.querySelector('.tkpi')&&!!g.querySelector('svg.bars.big')&&g.getBoundingClientRect().height>=innerHeight*.6})()"), "spending by day fills its own page, with highlights and a tall chart")
         ok(pg.evaluate("(()=>{const a=document.getElementById('hp2').getBoundingClientRect(),b=document.getElementById('hp3').getBoundingClientRect(),c=document.getElementById('hp4');return b.top-a.top>=innerHeight*.6&&(c.hidden||c.getBoundingClientRect().top-b.top>=innerHeight*.6)})()"), "spending by day and who paid each have their own page")
         ok(pg.evaluate("document.querySelectorAll('#stage svg.draw .seg').length>0&&getComputedStyle(document.querySelector('#stage svg .seg')).animationName==='segdraw'"), "the ring sweeps in")
         pg.keyboard.press("ArrowRight"); pg.wait_for_timeout(1200)
