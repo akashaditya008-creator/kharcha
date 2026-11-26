@@ -1,0 +1,38 @@
+# Every push to main is checked first; only a build that passes tools/check.py is published to GitHub Pages.
+# Pull requests are checked but never published. Only the app files are published (tools/ and .github/ stay out).
+name: Check and publish
+on:
+  push: { branches: [main] }
+  pull_request: {}
+  workflow_dispatch: {}
+permissions: { contents: read }
+concurrency: { group: pages, cancel-in-progress: false }
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: pip install playwright==1.48.0 && python -m playwright install --with-deps chromium
+      - name: Release check (blocks publishing if anything fails)
+        run: CHROME="$(python -c 'from playwright.sync_api import sync_playwright as s; p=s().start(); print(p.chromium.executable_path); p.stop()')" python tools/check.py
+      - name: Package the site (app files only)
+        if: github.event_name != 'pull_request'
+        run: |
+          mkdir _site
+          cp index.html sw.js manifest.webmanifest version.json icon-192.png icon-512.png _site/
+      - uses: actions/upload-pages-artifact@v5
+        if: github.event_name != 'pull_request'
+        with: { path: _site }
+  deploy:
+    needs: check
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions: { pages: write, id-token: write }
+    environment: { name: github-pages, url: "${{ steps.d.outputs.page_url }}" }
+    steps:
+      - id: d
+        uses: actions/deploy-pages@v5
